@@ -17,41 +17,102 @@ public class AnimationController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		/*Change the player's animation based on the current movement state and direction
+		 -direction: 0->forward, 1->forward_right, 2->right, 3->backward_right, 4->backward, 5->backward_left,
+		 	6->left, 7->forward_left, 8->NULL
+		 -movementType: 0->Idle, 1->Walk, 2->Run, 3->other*/
 		switch (playerManager.movementState) {
 		case PlayerManager.MovementState.IDLE:
-			animator.SetBool ("RunCheck", false);
-			animator.SetBool ("directionPress", false);
+			//Set the direction to NULL and other bool checks to false
+			animator.SetInteger ("direction", 8);
+			animator.SetInteger ("movementType", 0);
 			animator.SetBool ("jump", false);
+			//Code for the constructor model
 			animation.enabled = true;
 			animation.Play ("idle");
 			break;
 		case PlayerManager.MovementState.WALKING:
-			animator.SetBool ("RunCheck", false);
-			animator.SetBool ("directionPress", true);
+			//Set directionPress to true, but other flags to false
+			animator.SetInteger ("movementType", 1);
 			animator.SetBool ("jump", false);
+			//Set the direction flag
+			switch (playerManager.movementDirection) {
+			case PlayerManager.MovementDirection.FORWARD:
+				animator.SetInteger ("direction", 0);
+				break;
+			case PlayerManager.MovementDirection.FORWARD_RIGHT:
+				animator.SetInteger ("direction", 1);
+				break;
+			case PlayerManager.MovementDirection.RIGHT:
+				animator.SetInteger ("direction", 2);
+				break;
+			case PlayerManager.MovementDirection.BACKWARD_RIGHT:
+				animator.SetInteger ("direction", 3);
+				break;
+			case PlayerManager.MovementDirection.BACKWARD:
+				animator.SetInteger ("direction", 4);
+				break;
+			case PlayerManager.MovementDirection.BACKWARD_LEFT:
+				animator.SetInteger ("direction", 5);
+				break;
+			case PlayerManager.MovementDirection.LEFT:
+				animator.SetInteger ("direction", 6);
+				break;
+			case PlayerManager.MovementDirection.FORWARD_LEFT:
+				animator.SetInteger ("direction", 7);
+				break;
+			}
+			//Code for the constructor model
 			animation.enabled = true;
 			animation.Play ("walk");
 			break;
 		case PlayerManager.MovementState.RUNNING:
-			animator.SetBool ("RunCheck", true);
-			animator.SetBool ("directionPress", true);
+			//Set directionPress and runcheck to true, but other flags to false
+			animator.SetInteger ("movementType", 2);
 			animator.SetBool ("jump", false);
+			//Set the direction flag
+			switch (playerManager.movementDirection) {
+			case PlayerManager.MovementDirection.FORWARD:
+				animator.SetInteger ("direction", 0);
+				break;
+			case PlayerManager.MovementDirection.FORWARD_RIGHT:
+				animator.SetInteger ("direction", 1);
+				break;
+			case PlayerManager.MovementDirection.RIGHT:
+				animator.SetInteger ("direction", 2);
+				break;
+			case PlayerManager.MovementDirection.BACKWARD_RIGHT:
+				animator.SetInteger ("direction", 3);
+				break;
+			case PlayerManager.MovementDirection.BACKWARD:
+				animator.SetInteger ("direction", 4);
+				break;
+			case PlayerManager.MovementDirection.BACKWARD_LEFT:
+				animator.SetInteger ("direction", 5);
+				break;
+			case PlayerManager.MovementDirection.LEFT:
+				animator.SetInteger ("direction", 6);
+				break;
+			case PlayerManager.MovementDirection.FORWARD_LEFT:
+				animator.SetInteger ("direction", 7);
+				break;
+			}
+			//Code for the constructor model
 			animation.enabled = true;
 			animation.Play ("run");
 			break;
 		case PlayerManager.MovementState.Jumping:
-			animation["jump_pose"].wrapMode = WrapMode.Once;
+			//Set jump to true, but other flags to false
+			animator.SetInteger ("movementType", 3);
 			animator.SetBool ("jump", true);
-			//if (!animation.isPlaying) {
+			//Code for the constructor model
+			animation["jump_pose"].wrapMode = WrapMode.Once;
 			if (!animation.IsPlaying ("jump_pose")) {
 				animation.Play ("jump_pose");
 			}
 			if (animation.isPlaying && animation["jump_pose"].time > 0.1f) {
 				animation.enabled = false;
 			}
-			//}
-
-
 		break;
 	}
 }
