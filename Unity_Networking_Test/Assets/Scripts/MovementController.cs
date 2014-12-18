@@ -30,7 +30,8 @@ public class MovementController : MonoBehaviour {
 	void FixedUpdate () {
 
 		/*If the player is moving, rotate the player object slowly towards the direction of the camera*/
-		if (playerManager.movementState == PlayerManager.MovementState.WALKING || playerManager.movementState == PlayerManager.MovementState.RUNNING) {
+		if (playerManager.movementState == PlayerManager.MovementState.WALKING || playerManager.movementState == PlayerManager.MovementState.RUNNING ||
+		    playerManager.movementState == PlayerManager.MovementState.Jumping) {
 			Vector3 forwardXZ = new Vector3 (mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
 			playerTransform.forward = Vector3.Slerp (playerTransform.forward, forwardXZ, 0.1f);
 		}
@@ -75,9 +76,15 @@ public class MovementController : MonoBehaviour {
 			}
 			break;
 		case PlayerManager.MovementState.Jumping:
-			if (GetComponent<CapsuleCollider>().bounds.Intersects (GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>().bounds)) {
-				//playerManager.movementState = PlayerManager.MovementState.IDLE;
-				print ("collide with ground!");
+			if (playerManager.jumpState == PlayerManager.JumpState.ASCENDING) {
+				rigidbody.AddForce (Vector3.up * jumpImpulse, ForceMode.Impulse);
+				playerManager.jumpState = PlayerManager.JumpState.DESCENDING;
+			}
+			else if (playerManager.jumpState == PlayerManager.JumpState.DESCENDING) {
+				if (GetComponent<CapsuleCollider>().bounds.Intersects (GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>().bounds)) {
+					playerManager.movementState = PlayerManager.MovementState.IDLE;
+					print ("collide with ground!");
+				}
 			}
 			break;
 		}
@@ -110,7 +117,7 @@ public class MovementController : MonoBehaviour {
 		}
 
 
-		if (keysPressed > 0) {
+		if (keysPressed > 0 && playerManager.movementState != PlayerManager.MovementState.Jumping) {
 			if (Input.GetKey(KeyCode.LeftShift)) {
 				playerManager.movementState = PlayerManager.MovementState.RUNNING;
 			}
@@ -126,7 +133,8 @@ public class MovementController : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.Space) && playerManager.movementState != PlayerManager.MovementState.Jumping) {
 			print("jump!");
 			playerManager.movementState = PlayerManager.MovementState.Jumping;
-			rigidbody.AddForce (Vector3.up * jumpImpulse, ForceMode.Impulse);
+			playerManager.jumpState = PlayerManager.JumpState.ASCENDING;
+//			rigidbody.AddForce (Vector3.up * jumpImpulse, ForceMode.Impulse);
 		}
 	}
 }
