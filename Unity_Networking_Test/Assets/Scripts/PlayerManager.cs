@@ -8,6 +8,8 @@ public class PlayerManager : MonoBehaviour {
 	public MovementState movementState;
 	public enum JumpState { ASCENDING, DESCENDING };
 	public JumpState jumpState;
+	public enum MovementDirection { FORWARD, BACKWARD, LEFT, RIGHT, FORWARD_LEFT, FORWARD_RIGHT, BACKWARD_LEFT, BACKWARD_RIGHT }
+	public MovementDirection movementDirection;
 
 
 	// Use this for initialization

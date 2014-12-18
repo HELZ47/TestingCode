@@ -32,8 +32,16 @@ public class MovementController : MonoBehaviour {
 		/*If the player is moving, rotate the player object slowly towards the direction of the camera*/
 		if (playerManager.movementState == PlayerManager.MovementState.WALKING || playerManager.movementState == PlayerManager.MovementState.RUNNING ||
 		    playerManager.movementState == PlayerManager.MovementState.Jumping) {
-			Vector3 forwardXZ = new Vector3 (mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
-			playerTransform.forward = Vector3.Slerp (playerTransform.forward, forwardXZ, 0.1f);
+			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD ||
+			    playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD_LEFT ||
+			    playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD_RIGHT) {
+				Vector3 forwardXZ = new Vector3 (directionVector.x, 0, directionVector.z);
+				playerTransform.forward = Vector3.Slerp (playerTransform.forward, forwardXZ, 0.1f);
+			}
+			else {
+				Vector3 forwardXZ = new Vector3 (mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
+				playerTransform.forward = Vector3.Slerp (playerTransform.forward, forwardXZ, 0.1f);
+			}
 		}
 
 
@@ -102,18 +110,38 @@ public class MovementController : MonoBehaviour {
 		if (Input.GetKey(KeyCode.W)) {
 			keysPressed++;
 			directionVector += forwardXZ;
+			playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD;
 		}
 		if (Input.GetKey(KeyCode.S)) {
 			keysPressed++;
 			directionVector -= forwardXZ;
+			playerManager.movementDirection = PlayerManager.MovementDirection.BACKWARD;
 		}
 		if (Input.GetKey(KeyCode.A)) {
 			keysPressed++;
 			directionVector -= rightXZ;
+			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
+				playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD_LEFT;
+			}
+			else if (playerManager.movementDirection == PlayerManager.MovementDirection.BACKWARD) {
+				playerManager.movementDirection = PlayerManager.MovementDirection.BACKWARD_LEFT;
+			}
+			else {
+				playerManager.movementDirection = PlayerManager.MovementDirection.LEFT;
+			}
 		}
 		if (Input.GetKey(KeyCode.D)) {
 			keysPressed++;
 			directionVector += rightXZ;
+			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
+				playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD_RIGHT;
+			}
+			else if (playerManager.movementDirection == PlayerManager.MovementDirection.BACKWARD) {
+				playerManager.movementDirection = PlayerManager.MovementDirection.BACKWARD_RIGHT;
+			}
+			else {
+				playerManager.movementDirection = PlayerManager.MovementDirection.RIGHT;
+			}
 		}
 
 
