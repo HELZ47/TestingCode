@@ -71,14 +71,16 @@ public class MovementController : MonoBehaviour {
 			/*If the previous speed is faster than max walking speed (1.35 times), means that the player was running, 
 			therefore it needs to slow down to max walking speed*/
 			if (rigidbody.velocity.magnitude / maxWalkingSpeed > 1.35f) {
-				rigidbody.AddForce (directionVector.normalized * (-runningAcceleration), ForceMode.Acceleration);
-				if (rigidbody.velocity.magnitude < maxWalkingSpeed) {
-					Vector3 targetVelocity = directionVector.normalized * maxWalkingSpeed;
-					rigidbody.velocity = new Vector3 (targetVelocity.x, rigidbody.velocity.y, targetVelocity.z);
-				}
+				//print ("Oh no!!!!");
+				//rigidbody.AddForce (directionVector.normalized * (-runningAcceleration), ForceMode.Acceleration);
+//				if (rigidbody.velocity.magnitude < maxWalkingSpeed) {
+//					Vector3 targetVelocity = directionVector.normalized * maxWalkingSpeed;
+//					rigidbody.velocity = new Vector3 (targetVelocity.x, rigidbody.velocity.y, targetVelocity.z);
+//				}
 			}
 			/*Otherwise, perform normal walking calculation, but cap the max walking speed*/
 			else {
+				//print ("Even worse!!!!");
 				rigidbody.AddForce (directionVector.normalized * walkingAcceleration, ForceMode.Acceleration);
 				if (rigidbody.velocity.magnitude > maxWalkingSpeed) {
 					Vector3 targetVelocity = directionVector.normalized * maxWalkingSpeed;
