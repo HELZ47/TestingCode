@@ -206,7 +206,7 @@ ModelImporter:
       name: Jump
       takeName: _210_Run_JumpDownLow_Roll_Run
       firstFrame: 111
-      lastFrame: 185
+      lastFrame: 138
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
