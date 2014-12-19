@@ -205,11 +205,11 @@ ModelImporter:
     - serializedVersion: 16
       name: Jump
       takeName: _210_Run_JumpDownLow_Roll_Run
-      firstFrame: 111
-      lastFrame: 138
+      firstFrame: 114
+      lastFrame: 128
       wrapMode: 0
       orientationOffsetY: 0
-      level: 0
+      level: .910000026
       cycleOffset: 0
       loop: 0
       loopTime: 0

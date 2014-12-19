@@ -102,10 +102,18 @@ public class MovementController : MonoBehaviour {
 				playerManager.jumpState = PlayerManager.JumpState.DESCENDING;
 			}
 			else if (playerManager.jumpState == PlayerManager.JumpState.DESCENDING) {
-				if (GetComponent<CapsuleCollider>().bounds.Intersects (GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>().bounds)) {
-					playerManager.movementState = PlayerManager.MovementState.IDLE;
-					print ("collide with ground!");
+				CapsuleCollider capCol = GetComponent<CapsuleCollider>();
+				foreach (Collider col in Physics.OverlapSphere (transform.position, capCol.height/2f)) {
+					print (transform.position.y - capCol.height/2f + "     " + (col.transform.position.y + (col.bounds.size.y/2f)) + "   " + col.name);
+					if (col.tag == "Ground" && capCol.bounds.Intersects (col.bounds) && Mathf.Abs((transform.position.y - capCol.height/2f)-(col.transform.position.y + (col.bounds.size.y/2f)))<0.05f) {
+						playerManager.movementState = PlayerManager.MovementState.IDLE;
+						print ("collide with ground!" + capCol.center + "    " + capCol.radius);
+					}
 				}
+//				if (GetComponent<CapsuleCollider>().bounds.Intersects (GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>().bounds)) {
+//					playerManager.movementState = PlayerManager.MovementState.IDLE;
+//					print ("collide with ground!");
+//				}
 			}
 			break;
 		}
