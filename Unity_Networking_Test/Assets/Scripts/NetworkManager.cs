@@ -124,7 +124,8 @@ public class NetworkManager : MonoBehaviour {
 	//Spawnning a player through the network
 	public void SpawnPlayer () {
 		print ("Spawning player...");
-		Network.Instantiate (Resources.Load ("Prefabs/Player"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
+		//Network.Instantiate (Resources.Load ("Prefabs/Player"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
+		Network.Instantiate (Resources.Load ("Prefabs/Player_ThirdPerson"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
 	}
 
 	//Called when the application quits and clean up

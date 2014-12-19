@@ -20,6 +20,10 @@ public class MovementController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+//		if (!GetComponentInParent<NetworkView>().isMine) {
+//			//enabled = false;
+//			return;
+//		}
 		CheckInput();
 		print ("current speed: " + rigidbody.velocity.magnitude);
 		print ("directionVector: " + directionVector);
@@ -28,7 +32,10 @@ public class MovementController : MonoBehaviour {
 
 	// Fixed Update for physics objects and rigidbody interactions
 	void FixedUpdate () {
-
+//		if (!GetComponentInParent<NetworkView>().isMine) {
+//			//enabled = false;
+//			return;
+//		}
 		/*If the player is moving, rotate the player object slowly towards the direction of the camera*/
 		if (playerManager.movementState == PlayerManager.MovementState.WALKING || playerManager.movementState == PlayerManager.MovementState.RUNNING ||
 		    playerManager.movementState == PlayerManager.MovementState.Jumping) {

@@ -18,6 +18,10 @@ public class ThirdPersonCamera : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+//		if (!GetComponentInParent<NetworkView>().isMine) {
+//			//enabled = false;
+//			return;
+//		}
 		currentMousePosition = Input.mousePosition;
 		Vector3 mousePosDifference = currentMousePosition - prevMousePosition;
 
