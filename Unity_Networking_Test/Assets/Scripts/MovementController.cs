@@ -20,20 +20,23 @@ public class MovementController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-//		if (!GetComponentInParent<NetworkView>().isMine) {
-//			//enabled = false;
-//			return;
-//		}
+		if (!GetComponentInParent<NetworkView>().isMine) {
+			//enabled = false;
+			return;
+		}
 		CheckInput();
-		print ("current speed: " + rigidbody.velocity.magnitude);
-		print ("directionVector: " + directionVector);
+		//print ("current speed: " + rigidbody.velocity.magnitude);
+		//print ("directionVector: " + directionVector);
 	}
 
 
 	// Fixed Update for physics objects and rigidbody interactions
 	void FixedUpdate () {
-//		if (!GetComponentInParent<NetworkView>().isMine) {
-//			//enabled = false;
+		if (!GetComponentInParent<NetworkView>().isMine) {
+			//enabled = false;
+			return;
+		}
+//		if (!playerManager.activated) {
 //			return;
 //		}
 		/*If the player is moving, rotate the player object slowly towards the direction of the camera*/
@@ -43,6 +46,7 @@ public class MovementController : MonoBehaviour {
 			    playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD_LEFT ||
 			    playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD_RIGHT) {
 				Vector3 forwardXZ = new Vector3 (directionVector.x, 0, directionVector.z);
+				//print ("Slerping! forwardXZ: " + forwardXZ);
 				playerTransform.forward = Vector3.Slerp (playerTransform.forward, forwardXZ, 0.1f);
 			}
 			else {

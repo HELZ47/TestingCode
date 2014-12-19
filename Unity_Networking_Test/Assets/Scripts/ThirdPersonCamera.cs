@@ -18,8 +18,11 @@ public class ThirdPersonCamera : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-//		if (!GetComponentInParent<NetworkView>().isMine) {
-//			//enabled = false;
+		if (!GetComponentInParent<NetworkView>().isMine) {
+			//enabled = false;
+			return;
+		}
+//		if (!GetComponentInParent<PlayerManager>().activated) {
 //			return;
 //		}
 		currentMousePosition = Input.mousePosition;
@@ -28,6 +31,12 @@ public class ThirdPersonCamera : MonoBehaviour {
 
 		float angle = mousePosDifference.x / 30f;
 		angle = Input.GetAxis ("Mouse X") * mouseXSensitivity;
+
+		//Debug
+//		if (angle > 0) {
+//			print ("Rotate around X axis by " + angle);
+//		}
+
 		transform.RotateAround (cameraTarget.transform.position, new Vector3 (0, 1, 0), angle);
 
 		int YDirection = 1;
