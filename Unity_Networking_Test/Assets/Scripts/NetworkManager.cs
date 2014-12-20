@@ -30,15 +30,17 @@ public class NetworkManager : MonoBehaviour {
 		bool serverInitialized = false;
 		while (!serverInitialized) {
 			//try {
-				NetworkConnectionError error = Network.InitializeServer (16, listenPort, false); //25002 is default for Unity
-				if (error == NetworkConnectionError.NoError) {
-					serverInitialized = true;
-					MasterServer.RegisterHost (registerGameName, "Team_1_Network_Test", "This is a network test");
-				}
-				else {
-					serverInitialized = false;
-					listenPort++;
-				}
+
+
+			NetworkConnectionError error = Network.InitializeServer (16, listenPort, false); //25002 is default for Unity
+			if (error == NetworkConnectionError.NoError) {
+				serverInitialized = true;
+				MasterServer.RegisterHost (registerGameName, "Team_1_Network_Test", "This is a network test");
+			}
+			else {
+				serverInitialized = false;
+				listenPort++;
+			}
 			//}
 //			catch (System.Exception e) {
 //				listenPort++;
