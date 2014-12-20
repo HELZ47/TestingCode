@@ -6,8 +6,8 @@ public class MovementController : MonoBehaviour {
 	//Fields
 	public Camera mainCamera;
 	public Transform playerTransform;
-	public float maxWalkingSpeed, maxRunningSpeed;
-	public float walkingAcceleration, runningAcceleration, jumpImpulse;
+	public float maxWalkingSpeed, maxRunningSpeed, maxMidAirSpeed;
+	public float walkingAcceleration, runningAcceleration, jumpImpulse, midAirAcceleration;
 	PlayerManager playerManager;
 	Vector3 directionVector;
 
@@ -20,8 +20,8 @@ public class MovementController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		//Skip the rest if this player is not mine
 		if (!GetComponentInParent<NetworkView>().isMine) {
-			//enabled = false;
 			return;
 		}
 		CheckInput();
@@ -30,32 +30,31 @@ public class MovementController : MonoBehaviour {
 	}
 
 
-	// Fixed Update for physics objects and rigidbody interactions
+	// Fixed Update for physics objects and rigidbody interactions and character rotation
 	void FixedUpdate () {
+		//Skip the rest if this player is not mine
 		if (!GetComponentInParent<NetworkView>().isMine) {
-			//enabled = false;
 			return;
 		}
-//		if (!playerManager.activated) {
-//			return;
-//		}
+
 		/*If the player is moving, rotate the player object slowly towards the direction of the camera*/
 		if (playerManager.movementState == PlayerManager.MovementState.WALKING || playerManager.movementState == PlayerManager.MovementState.RUNNING ||
 		    playerManager.movementState == PlayerManager.MovementState.Jumping) {
+			/*If the player is moving forward, slerp to its own forward position*/
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD ||
 			    playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD_LEFT ||
 			    playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD_RIGHT) {
 				Vector3 forwardXZ = new Vector3 (directionVector.x, 0, directionVector.z);
-				//print ("Slerping! forwardXZ: " + forwardXZ);
 				playerTransform.forward = Vector3.Slerp (playerTransform.forward, forwardXZ, 0.1f);
 			}
+			/*If the player not moving forward, slerp towards the direction of the camera*/
 			else {
 				Vector3 forwardXZ = new Vector3 (mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
 				playerTransform.forward = Vector3.Slerp (playerTransform.forward, forwardXZ, 0.1f);
 			}
 		}
 
-
+		//Move the character according to its movement state
 		switch (playerManager.movementState) {
 		case PlayerManager.MovementState.IDLE:
 			/*If the current speed is very slow, stop immediately*/
@@ -64,32 +63,20 @@ public class MovementController : MonoBehaviour {
 			}
 			/*If the current speed is still significant, slow it down*/
 			else {
+				//This is not the best implementation, can do better
 				rigidbody.velocity = new Vector3 (rigidbody.velocity.x * 0.85f, rigidbody.velocity.y, rigidbody.velocity.z * 0.85f);
 			}
 			break;
 		case PlayerManager.MovementState.WALKING:
-			/*If the previous speed is faster than max walking speed (1.35 times), means that the player was running, 
-			therefore it needs to slow down to max walking speed*/
-			if (rigidbody.velocity.magnitude / maxWalkingSpeed > 1.35f) {
-				//print ("Oh no!!!!");
-				//rigidbody.AddForce (directionVector.normalized * (-runningAcceleration), ForceMode.Acceleration);
-//				if (rigidbody.velocity.magnitude < maxWalkingSpeed) {
-//					Vector3 targetVelocity = directionVector.normalized * maxWalkingSpeed;
-//					rigidbody.velocity = new Vector3 (targetVelocity.x, rigidbody.velocity.y, targetVelocity.z);
-//				}
-			}
-			/*Otherwise, perform normal walking calculation, but cap the max walking speed*/
-			else {
-				//print ("Even worse!!!!");
-				rigidbody.AddForce (directionVector.normalized * walkingAcceleration, ForceMode.Acceleration);
-				if (rigidbody.velocity.magnitude > maxWalkingSpeed) {
-					Vector3 targetVelocity = directionVector.normalized * maxWalkingSpeed;
-					rigidbody.velocity = new Vector3 (targetVelocity.x, rigidbody.velocity.y, targetVelocity.z);
-				}
+			/*Perform walking calculation, but cap the max walking speed without changing the gravity*/
+			rigidbody.AddForce (directionVector.normalized * walkingAcceleration, ForceMode.Acceleration);
+			if (rigidbody.velocity.magnitude > maxWalkingSpeed) {
+				Vector3 targetVelocity = directionVector.normalized * maxWalkingSpeed;
+				rigidbody.velocity = new Vector3 (targetVelocity.x, rigidbody.velocity.y, targetVelocity.z);
 			}
 			break;
 		case PlayerManager.MovementState.RUNNING:
-			/*Perform running acceleration on rigidbody, but cap the max running speed*/
+			/*Perform running acceleration on rigidbody, but cap the max running speed without changing the gravity*/
 			rigidbody.AddForce (directionVector.normalized * runningAcceleration, ForceMode.Acceleration);
 			if (rigidbody.velocity.magnitude > maxRunningSpeed) {
 				Vector3 targetVelocity = directionVector.normalized * maxRunningSpeed;
@@ -97,23 +84,34 @@ public class MovementController : MonoBehaviour {
 			}
 			break;
 		case PlayerManager.MovementState.Jumping:
+			//Ascend-->goes up, Descend-->goes down
 			if (playerManager.jumpState == PlayerManager.JumpState.ASCENDING) {
+				if ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude < maxWalkingSpeed*1.25f) {
+					maxMidAirSpeed = maxWalkingSpeed;
+				}
+				else  {
+					maxMidAirSpeed = maxRunningSpeed;
+				}  
 				rigidbody.AddForce (Vector3.up * jumpImpulse, ForceMode.Impulse);
 				playerManager.jumpState = PlayerManager.JumpState.DESCENDING;
 			}
+			//Needs better implementation, can jump if around the edge of the wall
 			else if (playerManager.jumpState == PlayerManager.JumpState.DESCENDING) {
 				CapsuleCollider capCol = GetComponent<CapsuleCollider>();
+				BoxCollider boxCol = GetComponent<BoxCollider>();
 				foreach (Collider col in Physics.OverlapSphere (transform.position, capCol.height/2f)) {
-					print (transform.position.y - capCol.height/2f + "     " + (col.transform.position.y + (col.bounds.size.y/2f)) + "   " + col.name);
-					if (col.tag == "Ground" && capCol.bounds.Intersects (col.bounds) && Mathf.Abs((transform.position.y - capCol.height/2f)-(col.transform.position.y + (col.bounds.size.y/2f)))<0.05f) {
+					if (col.tag == "Ground" && boxCol.bounds.Intersects (col.bounds)) {
 						playerManager.movementState = PlayerManager.MovementState.IDLE;
-						print ("collide with ground!" + capCol.center + "    " + capCol.radius);
 					}
 				}
-//				if (GetComponent<CapsuleCollider>().bounds.Intersects (GameObject.FindGameObjectWithTag("Ground").GetComponent<MeshCollider>().bounds)) {
-//					playerManager.movementState = PlayerManager.MovementState.IDLE;
-//					print ("collide with ground!");
-//				}
+				if (playerManager.movementState == PlayerManager.MovementState.Jumping) {
+					rigidbody.AddForce (directionVector.normalized * midAirAcceleration, ForceMode.Acceleration);
+					Vector2 XZVelocity = new Vector2 (rigidbody.velocity.x, rigidbody.velocity.z);
+					if (XZVelocity.magnitude > maxMidAirSpeed) {
+						XZVelocity = XZVelocity.normalized * maxMidAirSpeed;
+						rigidbody.velocity = new Vector3 (XZVelocity.x, rigidbody.velocity.y, XZVelocity.y);
+					}
+				}
 			}
 			break;
 		}
@@ -126,21 +124,21 @@ public class MovementController : MonoBehaviour {
 		Vector3 forwardXZ = new Vector3 (mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
 		Vector3 rightXZ = new Vector3 (mainCamera.transform.right.x, 0, mainCamera.transform.right.z);
 		int keysPressed = 0;
-		directionVector = new Vector3 ();
+		Vector3 nextDirectionVector = new Vector3 ();
 
 		if (Input.GetKey(KeyCode.W)) {
 			keysPressed++;
-			directionVector += forwardXZ;
+			nextDirectionVector += forwardXZ;
 			playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD;
 		}
 		if (Input.GetKey(KeyCode.S)) {
 			keysPressed++;
-			directionVector -= forwardXZ;
+			nextDirectionVector -= forwardXZ;
 			playerManager.movementDirection = PlayerManager.MovementDirection.BACKWARD;
 		}
 		if (Input.GetKey(KeyCode.A)) {
 			keysPressed++;
-			directionVector -= rightXZ;
+			nextDirectionVector -= rightXZ;
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
 				playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD_LEFT;
 			}
@@ -153,7 +151,7 @@ public class MovementController : MonoBehaviour {
 		}
 		if (Input.GetKey(KeyCode.D)) {
 			keysPressed++;
-			directionVector += rightXZ;
+			nextDirectionVector += rightXZ;
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
 				playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD_RIGHT;
 			}
@@ -165,8 +163,8 @@ public class MovementController : MonoBehaviour {
 			}
 		}
 
-
 		if (keysPressed > 0 && playerManager.movementState != PlayerManager.MovementState.Jumping) {
+			directionVector = nextDirectionVector;
 			if (Input.GetKey(KeyCode.LeftShift)) {
 				playerManager.movementState = PlayerManager.MovementState.RUNNING;
 			}
@@ -176,14 +174,17 @@ public class MovementController : MonoBehaviour {
 		}
 		else if (playerManager.movementState!= PlayerManager.MovementState.Jumping){
 			playerManager.movementState = PlayerManager.MovementState.IDLE;
+			directionVector = Vector3.zero;
+		}
+		else if (playerManager.movementState == PlayerManager.MovementState.Jumping) {
+			directionVector = directionVector + nextDirectionVector.normalized*0.2f;
 		}
 
 		
 		if (Input.GetKeyDown (KeyCode.Space) && playerManager.movementState != PlayerManager.MovementState.Jumping) {
-			print("jump!");
+			directionVector = nextDirectionVector;
 			playerManager.movementState = PlayerManager.MovementState.Jumping;
 			playerManager.jumpState = PlayerManager.JumpState.ASCENDING;
-//			rigidbody.AddForce (Vector3.up * jumpImpulse, ForceMode.Impulse);
 		}
 	}
 }
