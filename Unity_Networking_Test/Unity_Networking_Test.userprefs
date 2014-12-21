@@ -1,13 +1,12 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\ChangeColor.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Launch_Projectile.cs">
     <Files>
-      <File FileName="Assets\Scripts\NetworkManager.cs" Line="33" Column="1" />
-      <File FileName="Assets\Scripts\MovementController.cs" Line="122" Column="22" />
-      <File FileName="Assets\Scripts\AnimationController.cs" Line="171" Column="57" />
-      <File FileName="Assets\Scripts\ThirdPersonCamera.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\PlayerManager.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\ChangeColor.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Launch_Projectile.cs" Line="50" Column="55" />
+      <File FileName="Assets/Scripts/Projectile.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/GlobalSettings.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/NetworkManager.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/ChangeColor.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
