@@ -219,7 +219,9 @@ public class Projectile : MonoBehaviour {
 	[RPC]
 	void DetonateProjectile () {
 		isHit = true;
-		rigidbody.velocity = Vector3.zero;
+		if (!rigidbody.isKinematic) {
+			rigidbody.velocity = Vector3.zero;
+		}
 		rigidbody.isKinematic = true;
 		rigidbody.detectCollisions = false;
 		projectParticles.Stop ();
