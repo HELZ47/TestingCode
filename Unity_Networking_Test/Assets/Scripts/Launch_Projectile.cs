@@ -19,7 +19,7 @@ public class Launch_Projectile : MonoBehaviour {
 		}
 		//Mouse Buttons: 0-->Left, 1-->right, 2-->wheel
 		if (Input.GetMouseButtonDown (0)) {
-			print ("Launching Projectile");
+
 
 			ThirdPersonCamera TPCamera = GetComponentInChildren<ThirdPersonCamera>();
 			Transform targetTransform = TPCamera.cameraTarget.transform;
@@ -31,10 +31,12 @@ public class Launch_Projectile : MonoBehaviour {
 			Vector3 projectileTargetPosition;
 			if (Physics.Raycast (projectionStartPos, projectileDirection, out rayHit)) {
 				projectileTargetPosition = rayHit.point;	
+				print ("Target Aquired!");
 			}
 		
 			else {
 				projectileTargetPosition = projectionStartPos + (projectileDirection*100f);
+				print ("Target Too Far!");
 			}
 
 			GameObject fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Bullet"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;

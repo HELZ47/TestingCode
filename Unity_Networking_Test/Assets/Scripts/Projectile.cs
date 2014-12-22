@@ -7,11 +7,12 @@ public class Projectile : MonoBehaviour {
 	public enum ProjectileType { BULLET, GRENADE, ORB }
 	public ProjectileType projectileType;
 	public ParticleSystem projectParticles, hitParticles;
+	public float lifeTime;
 	public float bulletSpeed, grenadeSpeed, orbSpeed;
 	public float bulletGSpeed, grenadeGSpeed, orbGSpeed;
 	public NetworkPlayer owner;
 	Vector3 direction;
-	float speed, gSpeed;
+	float speed, gSpeed, timeAlive;
 	bool isHit;
 
 	[RPC]
@@ -38,6 +39,7 @@ public class Projectile : MonoBehaviour {
 		projectParticles.Play ();
 		hitParticles.Stop ();
 		isHit = false;
+		timeAlive = 0f;
 		
 		switch (projectileType) {
 		case ProjectileType.BULLET:
@@ -63,22 +65,20 @@ public class Projectile : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if (!networkView.isMine) {
+		if (!networkView.isMine) { //This is here because network.destroy can only be called once
 			return;
 		}
 		if (isHit == true && projectParticles.isStopped) {
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
 		}
+		else if (!isHit && timeAlive > lifeTime) {
+			Network.RemoveRPCs (networkView.viewID);
+			Network.Destroy (gameObject);
+		}
 		else {
 			networkView.RPC ("DetectCollision", RPCMode.AllBuffered);
 		}
-		//DetectCollision ();
-//		if (isHit == true && projectParticles.isStopped) {
-//			//Network.Destroy (this.gameObject);
-//			
-//			networkView.RPC ("Destroy", RPCMode.AllBuffered);
-//		}
 	}
 
 
@@ -99,29 +99,9 @@ public class Projectile : MonoBehaviour {
 				GetComponent<Collider>().isTrigger = true;
 			}
 		}
+		if (!isHit) {
+			timeAlive += Time.deltaTime;
+		}
 	}
-
-
-	[RPC]
-	void Destroy () {
-		Network.Destroy (this.gameObject);
-	}
-
-
-//	void OnCollisionEnter (Collision col) {
-//		if (!networkView.isMine) {
-//			return;
-//		}
-//		print ("Collided!!!");
-//		if (!col.gameObject.GetComponentInParent<NetworkView>() || 
-//			col.gameObject.GetComponentInParent<NetworkView>().owner != owner && !isHit) {
-//			isHit = true;
-//			rigidbody.velocity = Vector3.zero;
-//			rigidbody.isKinematic = true;
-//			rigidbody.detectCollisions = false;
-//			projectParticles.Stop ();
-//			hitParticles.Play ();
-//			GetComponent<Collider>().isTrigger = true;
-//		}
-//	}
+	
 }
