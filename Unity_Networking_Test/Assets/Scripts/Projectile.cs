@@ -88,6 +88,7 @@ public class Projectile : MonoBehaviour {
 		}
 		else {
 			networkView.RPC ("DetectCollision", RPCMode.AllBuffered);
+
 		}
 	}
 
@@ -113,6 +114,20 @@ public class Projectile : MonoBehaviour {
 			}
 			if (!isHit) {
 				timeAlive += Time.deltaTime;
+				//Debug----------------------------
+				ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
+				int numOfParticles = projectParticles.GetParticles (particles);
+				Vector3 pVelocity = rigidbody.velocity * -1f;
+				if (pVelocity.magnitude > 5f) {
+					pVelocity = pVelocity.normalized * 5f;
+				}
+				int i = 0;
+				while (i<numOfParticles) {
+					particles[i].velocity = pVelocity;
+					i++;
+				}
+				projectParticles.SetParticles (particles, numOfParticles);
+				//---------------------------------
 			}
 			break;
 		case ProjectileType.GRENADE:
@@ -133,6 +148,20 @@ public class Projectile : MonoBehaviour {
 			}
 			if (!isHit) {
 				timeAlive += Time.deltaTime;
+				//Debug----------------------------
+				ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
+				int numOfParticles = projectParticles.GetParticles (particles);
+				Vector3 pVelocity = rigidbody.velocity * -1f;
+				if (pVelocity.magnitude > 5f) {
+					pVelocity = pVelocity.normalized * 5f;
+				}
+				int i = 0;
+				while (i<numOfParticles) {
+					particles[i].velocity = pVelocity;
+					i++;
+				}
+				projectParticles.SetParticles (particles, numOfParticles);
+				//---------------------------------
 			}
 			if (!isHit && timeAlive > lifeTime) {
 				isHit = true;
