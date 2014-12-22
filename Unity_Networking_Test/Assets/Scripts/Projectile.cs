@@ -19,8 +19,18 @@ public class Projectile : MonoBehaviour {
 	void SetVariables (Vector3 givenDirection, NetworkPlayer ownerNP) {
 		direction = givenDirection.normalized;
 		owner = ownerNP;
-		rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
 
+		switch (projectileType) {
+		case ProjectileType.BULLET:
+			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
+			break;
+		case ProjectileType.GRENADE:
+			rigidbody.AddForce (direction * speed, ForceMode.Impulse);
+			break;
+		case ProjectileType.ORB:
+
+			break;
+		}
 	}
 
 
@@ -68,11 +78,11 @@ public class Projectile : MonoBehaviour {
 		if (!networkView.isMine) { //This is here because network.destroy can only be called once
 			return;
 		}
-		if (isHit == true && projectParticles.isStopped) {
+		if (isHit == true && !hitParticles.isPlaying) {
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
 		}
-		else if (!isHit && timeAlive > lifeTime) {
+		else if (isHit != true && timeAlive > lifeTime) {
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
 		}
@@ -84,24 +94,61 @@ public class Projectile : MonoBehaviour {
 
 	[RPC]
 	void DetectCollision () {
-		foreach (RaycastHit hitInfo in Physics.RaycastAll (transform.position, direction.normalized, 1f)) {
-			if (hitInfo.collider != this.collider &&
-			    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
-			 	hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
-			    !isHit) {
+		switch (projectileType) {
+		case ProjectileType.BULLET:
+			foreach (RaycastHit hitInfo in Physics.RaycastAll (transform.position, direction.normalized, 1f)) {
+				if (hitInfo.collider != this.collider &&
+				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
+				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
+				    !isHit) {
+					isHit = true;
+					rigidbody.velocity = Vector3.zero;
+					rigidbody.isKinematic = true;
+					rigidbody.detectCollisions = false;
+					transform.position = hitInfo.point;
+					projectParticles.Stop ();
+					hitParticles.Play ();
+					GetComponent<Collider>().isTrigger = true;
+				}
+			}
+			if (!isHit) {
+				timeAlive += Time.deltaTime;
+			}
+			break;
+		case ProjectileType.GRENADE:
+			foreach (RaycastHit hitInfo in Physics.RaycastAll (transform.position, direction.normalized, 1f)) {
+				if (hitInfo.collider != this.collider &&
+				    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
+				 	hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner &&
+				    !isHit) {
+					isHit = true;
+					rigidbody.velocity = Vector3.zero;
+					rigidbody.isKinematic = true;
+					rigidbody.detectCollisions = false;
+					transform.position = hitInfo.point;
+					projectParticles.Stop ();
+					hitParticles.Play ();
+					GetComponent<Collider>().isTrigger = true;
+				}
+			}
+			if (!isHit) {
+				timeAlive += Time.deltaTime;
+			}
+			if (!isHit && timeAlive > lifeTime) {
 				isHit = true;
 				rigidbody.velocity = Vector3.zero;
 				rigidbody.isKinematic = true;
 				rigidbody.detectCollisions = false;
-				transform.position = hitInfo.point;
 				projectParticles.Stop ();
 				hitParticles.Play ();
 				GetComponent<Collider>().isTrigger = true;
 			}
+			break;
+		case ProjectileType.ORB:
+
+			break;
 		}
-		if (!isHit) {
-			timeAlive += Time.deltaTime;
-		}
+
 	}
 	
 }
