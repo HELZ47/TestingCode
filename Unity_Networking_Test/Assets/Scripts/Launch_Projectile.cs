@@ -39,7 +39,7 @@ public class Launch_Projectile : MonoBehaviour {
 				//print ("Target Too Far!");
 			}
 
-			GameObject fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Bullet"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+			GameObject fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
 			//Vector3 direction = GetComponentInChildren<ThirdPersonCamera>().cameraTarget.transform.position - GetComponentInChildren<ThirdPersonCamera>().transform.position;
 			Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 			fireBall.GetComponent<Projectile>().InitVariables (direction.normalized, Network.player);

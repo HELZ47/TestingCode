@@ -28,7 +28,7 @@ public class Projectile : MonoBehaviour {
 			rigidbody.AddForce (direction * speed, ForceMode.Impulse);
 			break;
 		case ProjectileType.ORB:
-
+			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
 			break;
 		}
 	}
@@ -110,6 +110,7 @@ public class Projectile : MonoBehaviour {
 					projectParticles.Stop ();
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
+					GetComponent<MeshRenderer>().enabled = false;
 				}
 			}
 			if (!isHit) {
@@ -144,6 +145,7 @@ public class Projectile : MonoBehaviour {
 					projectParticles.Stop ();
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
+					GetComponent<MeshRenderer>().enabled = false;
 				}
 			}
 			if (!isHit) {
@@ -171,13 +173,71 @@ public class Projectile : MonoBehaviour {
 				projectParticles.Stop ();
 				hitParticles.Play ();
 				GetComponent<Collider>().isTrigger = true;
+				GetComponent<MeshRenderer>().enabled = false;
 			}
 			break;
 		case ProjectileType.ORB:
-
+			foreach (RaycastHit hitInfo in Physics.RaycastAll (transform.position, direction.normalized, 1f)) {
+				if (hitInfo.collider != this.collider &&
+				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
+				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
+				    !isHit) {
+					isHit = true;
+					rigidbody.velocity = Vector3.zero;
+					rigidbody.isKinematic = true;
+					rigidbody.detectCollisions = false;
+					transform.position = hitInfo.point;
+					projectParticles.Stop ();
+					hitParticles.Play ();
+					GetComponent<Collider>().isTrigger = true;
+					GetComponent<MeshRenderer>().enabled = false;
+				}
+			}
+			if (!isHit) {
+				timeAlive += Time.deltaTime;
+				//Debug----------------------------
+				ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
+				int numOfParticles = projectParticles.GetParticles (particles);
+				Vector3 pVelocity = rigidbody.velocity * -1f;
+				if (pVelocity.magnitude > 5f) {
+					pVelocity = pVelocity.normalized * 5f;
+				}
+				int i = 0;
+				while (i<numOfParticles) {
+					particles[i].velocity = pVelocity;
+					i++;
+				}
+				projectParticles.SetParticles (particles, numOfParticles);
+				//---------------------------------
+			}
 			break;
 		}
 
+	}
+
+
+	[RPC]
+	void DetonateProjectile () {
+		isHit = true;
+		rigidbody.velocity = Vector3.zero;
+		rigidbody.isKinematic = true;
+		rigidbody.detectCollisions = false;
+		projectParticles.Stop ();
+		hitParticles.Play ();
+		GetComponent<Collider>().isTrigger = true;
+		GetComponent<MeshRenderer>().enabled = false;
+	}
+
+	void OnCollisionEnter (Collision col) {
+//		if (!networkView.isMine) {
+//			return;
+//		}
+//		Network.RemoveRPCs (networkView.viewID);
+//		Network.Destroy (gameObject);
+		if (!col.collider.gameObject.GetComponentInParent<NetworkView>() ||
+		    col.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) {
+			networkView.RPC ("DetonateProjectile", RPCMode.AllBuffered);
+		}
 	}
 	
 }
