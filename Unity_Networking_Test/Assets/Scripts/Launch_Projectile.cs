@@ -14,6 +14,9 @@ public class Launch_Projectile : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		if (!networkView.isMine) {
+			return;
+		}
 		//Mouse Buttons: 0-->Left, 1-->right, 2-->wheel
 		if (Input.GetMouseButtonDown (0)) {
 			print ("Launching Projectile");
@@ -34,10 +37,10 @@ public class Launch_Projectile : MonoBehaviour {
 				projectileTargetPosition = projectionStartPos + (projectileDirection*100f);
 			}
 
-			GameObject fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fireball"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+			GameObject fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Bullet"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
 			//Vector3 direction = GetComponentInChildren<ThirdPersonCamera>().cameraTarget.transform.position - GetComponentInChildren<ThirdPersonCamera>().transform.position;
 			Vector3 direction = (projectileTargetPosition - transform.position).normalized;
-			fireBall.GetComponent<Projectile>().MoveProjectile (direction.normalized);
+			fireBall.GetComponent<Projectile>().InitVariables (direction.normalized, Network.player);
 		}
 
 		if (Input.GetMouseButton(1)) {
