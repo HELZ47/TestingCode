@@ -2,28 +2,25 @@
 using System.Collections;
 using System.Collections.Generic;
 
+//Handles lauching the projectile and its related controls
 public class Launch_Projectile : MonoBehaviour {
 
 	//Fields
 	bool rightTriggerDown, rightTriggerReset;
-	List<GameObject> launchedProjectiles;
-	int ProjectileGroup;
-
-
+	
 	// Use this for initialization
 	void Start () {
 		rightTriggerDown = false;
 		rightTriggerReset = false;
-		launchedProjectiles = new List<GameObject> ();
 	}
 
 
 	// Update is called once per frame
 	void Update () {
-		if (!networkView.isMine) {
+		if (!networkView.isMine) { //Skip this function if the object is not the player's
 			return;
 		}
-		ProjectileGroup = Random.Range (10000, 99999);
+		//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
 		if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
 			rightTriggerDown = true;
 		}
@@ -35,56 +32,50 @@ public class Launch_Projectile : MonoBehaviour {
 			rightTriggerReset = true;
 		}
 		//Mouse Buttons: 0-->Left, 1-->right, 2-->wheel
+		//launched: rightTriggerDown or rightBumperDown or leftBumperDown
 		bool launched = rightTriggerDown || Input.GetButtonDown ("Mac_RightBumper") ||
 			Input.GetButtonDown ("Mac_LeftBumper");
+		//If the corresponding input is pressed, launch the corresponding projectile
 		if (Input.GetMouseButtonDown (0) || launched) {
-
-
+			//Get the third person camera and it's target transform
 			ThirdPersonCamera TPCamera = GetComponentInChildren<ThirdPersonCamera>();
 			Transform targetTransform = TPCamera.cameraTarget.transform;
-
+			//Get the start position of the projectile based on the direction of the camera target
 			Vector3 projectileDirection = (targetTransform.position - TPCamera.transform.position).normalized;
 			Vector3 projectionStartPos = targetTransform.position + projectileDirection;
 			RaycastHit rayHit;
-
 			Vector3 projectileTargetPosition;
+			//Raycast from the player to the target to see if we are target something
 			if (Physics.Raycast (projectionStartPos, projectileDirection, out rayHit)) {
-				projectileTargetPosition = rayHit.point;	
-				//print ("Target Aquired!");
+				projectileTargetPosition = rayHit.point;
 			}
-		
+			//If not targeting anything, set the target far in that direction
 			else {
 				projectileTargetPosition = projectionStartPos + (projectileDirection*100f);
-				//print ("Target Too Far!");
 			}
 
+			//Create a RPC call that creates the corresponding projectile
 			GameObject fireBall;
 			if (rightTriggerDown) {
-				//fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Bullet"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Bullet", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
 			else if (Input.GetButtonDown ("Mac_RightBumper")) {
-//				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Grenade"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Grenade", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
 			else if (Input.GetButtonDown ("Mac_LeftBumper")) {
-//				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
+			//Mouse can only lauch one kind of projectile
 			else {
-				//fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), ProjectileGroup) as GameObject;
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
-			//launchedProjectiles.Add (fireBall.gameObject);
-			////Vector3 direction = GetComponentInChildren<ThirdPersonCamera>().cameraTarget.transform.position - GetComponentInChildren<ThirdPersonCamera>().transform.position;
-			//Vector3 direction = (projectileTargetPosition - transform.position).normalized;
-			//fireBall.GetComponent<Projectile>().InitVariables (direction.normalized, Network.player, ProjectileGroup);
 		}
 
+		//Handles the zooming function with right mouse click or left trigger
 		if (Input.GetMouseButton(1) || Input.GetAxis("Mac_LeftTrigger") > 0) {
 			GetComponentInChildren<Camera>().fieldOfView -= 200f * Time.deltaTime;
 			if (GetComponentInChildren<Camera>().fieldOfView < 30f) {
@@ -97,22 +88,11 @@ public class Launch_Projectile : MonoBehaviour {
 				GetComponentInChildren<Camera>().fieldOfView = 60f;
 			}
 		}
-
-//		GameObject[] projectilesTBR = new GameObject[launchedProjectiles.Count];
-//		int i = 0;
-//		foreach (GameObject gObject in launchedProjectiles) {
-//			if (gObject.GetComponent<Projectile>().removeRPCs = true) {
-//				Network.RemoveRPCs (gObject.GetComponent<NetworkView>().viewID);
-//				projectilesTBR[i] = gObject;
-//				i++;
-//			}
-//		}
-//		for (int j = 0; j < projectilesTBR.Length; j++) {
-//			launchedProjectiles.Remove (projectilesTBR[j]);
-//		}
 	}
 
+
 	[RPC]
+	//RPC call that creates the projectile on the server side
 	public void CreateProjectile (string source, Vector3 position, Quaternion rotation, Vector3 direction, NetworkPlayer np) {
 		if (Network.isServer) {
 			GameObject projectile = Network.Instantiate (Resources.Load(source), position, rotation, 0) as GameObject;

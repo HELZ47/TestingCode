@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//The script the controls the projectile
 public class Projectile : MonoBehaviour {
 
 	//Fields
