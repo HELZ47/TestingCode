@@ -7,20 +7,20 @@ public class Projectile : MonoBehaviour {
 	public enum ProjectileType { BULLET, GRENADE, ORB }
 	public ProjectileType projectileType;
 	public ParticleSystem projectParticles, hitParticles;
-	public float lifeTime;
-	public float bulletSpeed, grenadeSpeed, orbSpeed;
-	public float bulletGSpeed, grenadeGSpeed, orbGSpeed;
-	public NetworkPlayer owner;
-	public bool removeRPCs;
+	public float lifeTime, speed;
+	NetworkPlayer owner;
 	int RPCGroup;
 	Vector3 direction;
-	float speed, gSpeed, timeAlive;
+	float timeAlive;
 	bool isHit;
 
+	
 	[RPC]
+	//RPC calls that sets the variables, this is called when the object is initialized
 	void SetVariables (Vector3 givenDirection, NetworkPlayer ownerNP) {
 		direction = givenDirection.normalized;
 		owner = ownerNP;
+		//Propels the projectile according to its projectile type
 		switch (projectileType) {
 		case ProjectileType.BULLET:
 			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
@@ -32,63 +32,26 @@ public class Projectile : MonoBehaviour {
 			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
 			break;
 		}
-//		if (owner == Network.player) {
-//			print ("same player!");
-//		}
-//		else {
-//			print ("different player!");
-//		}
-//		if (networkView.group == RPCGroup) {
-//			print ("Same group!");
-//		}
-//		else {
-//			print ("Different group!");
-//		}
 	}
 
-
-
-	//Setup the initial variables for the projectile
+	
+	//RPC Helper: Setup the initial variables for the projectile
 	public void InitVariables (Vector3 givenDirection, NetworkPlayer ownerNP) { 
-//		direction = givenDirection.normalized;
-//		ownerGameObject = ownerGO;
-//		rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
 		networkView.RPC ("SetVariables", RPCMode.AllBuffered, givenDirection, ownerNP);
 	}
 
 
-	//Initialized its own vatiables when instantiated
+	//Initialized its own vatiables locally when instantiated
 	void Awake () {
-		projectParticles.Play ();
-		hitParticles.Stop ();
-		isHit = false;
-		timeAlive = 0f;
-		removeRPCs = false;
-		
-		switch (projectileType) {
-		case ProjectileType.BULLET:
-			speed = bulletSpeed;
-			gSpeed = bulletGSpeed;
-			break;
-		case ProjectileType.GRENADE:
-			speed = grenadeSpeed;
-			gSpeed = grenadeGSpeed;
-			break;
-		case ProjectileType.ORB:
-			speed = orbSpeed;
-			gSpeed = orbGSpeed;
-			break;
-		}
+		projectParticles.Play (); //Play normal particles
+		hitParticles.Stop (); //Stop explosion particles
+		isHit = false; //Set the isHit flag to false
+		timeAlive = 0f; //Initialize the time alive
 	}
 
 
 	// Use this for initialization
 	void Start () {
-//		if (!networkView.isMine) { //This is here because network.destroy can only be called once
-//			rigidbody.isKinematic = true;
-//			rigidbody.detectCollisions = false;
-//			GetComponent<Collider>().isTrigger = true;
-//		}
 	}
 	
 	
@@ -97,47 +60,25 @@ public class Projectile : MonoBehaviour {
 		if (!networkView.isMine) { //This is here because network.destroy can only be called once
 			return;
 		}
+		//If the projectile hit something and the explosion animation stopped, destoy the projectile
 		if (isHit == true && !hitParticles.isPlaying) {
 			Network.RemoveRPCs (networkView.viewID);
-//			Network.RemoveRPCsInGroup (RPCGroup);
-			//print ("removing group " + RPCGroup);
-			//Network.RemoveRPCs (networkView.viewID);
-//			ownerLaunchProjectile.RemoveRPCs (networkView.viewID);
-//			DestroyProjectile (networkView.viewID);
-//			networkView.RPC ("DestroyProjectile", RPCMode.AllBuffered,networkView.viewID);
-			//removeRPCs = true;
 			Network.Destroy (gameObject);
-			//networkView.RPC ("DestroyProjectile", RPCMode.AllBuffered, networkView.viewID);
 		}
+		//If the projectile did not hit anything, but it has outlived its lifetime
 		else if (isHit != true && timeAlive > lifeTime) {
 			Network.RemoveRPCs (networkView.viewID);
-//			Network.RemoveRPCsInGroup (RPCGroup);
-			//print ("removing group " + RPCGroup);
-			//Network.RemoveRPCs (networkView.viewID);
-//			ownerLaunchProjectile.RemoveRPCs (networkView.viewID);
-//			DestroyProjectile (networkView.viewID);
-			//networkView.RPC ("DestroyProjectile", RPCMode.AllBuffered, networkView.viewID);
-//			removeRPCs = true;
 			Network.Destroy (gameObject);
-			//networkView.RPC ("DestroyProjectile", RPCMode.AllBuffered, networkView.viewID);
 		}
+		//Check if the projectiles has hit anything
 		else {
 			networkView.RPC ("DetectCollision", RPCMode.AllBuffered);
 		}
 	}
+	
 
 	[RPC]
-	void DestroyProjectile (NetworkViewID id) {
-		if (networkView.isMine) {
-			Network.RemoveRPCs (id);
-			Network.Destroy (gameObject);
-		}
-//		else {
-//			networkView.RPC ("DestroyProjectile", RPCMode.Server, id);
-//		}
-	}
-
-	[RPC]
+	//RPC call that detect collisions
 	void DetectCollision () {
 		switch (projectileType) {
 		case ProjectileType.BULLET:
@@ -147,10 +88,8 @@ public class Projectile : MonoBehaviour {
 				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
-					//rigidbody.velocity = Vector3.zero;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
-					//transform.position = hitInfo.point;
 					projectParticles.Stop ();
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
@@ -159,7 +98,7 @@ public class Projectile : MonoBehaviour {
 			}
 			if (!isHit) {
 				timeAlive += Time.deltaTime;
-				//Debug----------------------------
+				//Debug: change the direction of the particles ----------------------------
 				ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
 				int numOfParticles = projectParticles.GetParticles (particles);
 				Vector3 pVelocity = rigidbody.velocity * -1f;
@@ -182,10 +121,8 @@ public class Projectile : MonoBehaviour {
 				 	hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
-					//rigidbody.velocity = Vector3.zero;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
-					//transform.position = hitInfo.point;
 					projectParticles.Stop ();
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
@@ -194,7 +131,7 @@ public class Projectile : MonoBehaviour {
 			}
 			if (!isHit) {
 				timeAlive += Time.deltaTime;
-				//Debug----------------------------
+				//Debug: change the direction of the particles----------------------------
 				ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
 				int numOfParticles = projectParticles.GetParticles (particles);
 				Vector3 pVelocity = rigidbody.velocity * -1f;
@@ -211,7 +148,6 @@ public class Projectile : MonoBehaviour {
 			}
 			if (!isHit && timeAlive > lifeTime) {
 				isHit = true;
-				//rigidbody.velocity = Vector3.zero;
 				rigidbody.isKinematic = true;
 				rigidbody.detectCollisions = false;
 				projectParticles.Stop ();
@@ -227,10 +163,8 @@ public class Projectile : MonoBehaviour {
 				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
-					//rigidbody.velocity = Vector3.zero;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
-					//transform.position = hitInfo.point;
 					projectParticles.Stop ();
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
@@ -239,7 +173,7 @@ public class Projectile : MonoBehaviour {
 			}
 			if (!isHit) {
 				timeAlive += Time.deltaTime;
-				//Debug----------------------------
+				//Debug: change the direction of the particles----------------------------
 				ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
 				int numOfParticles = projectParticles.GetParticles (particles);
 				Vector3 pVelocity = rigidbody.velocity * -1f;
@@ -260,30 +194,5 @@ public class Projectile : MonoBehaviour {
 	}
 
 
-	[RPC]
-	void DetonateProjectile () {
-		isHit = true;
-		if (!rigidbody.isKinematic) {
-			rigidbody.velocity = Vector3.zero;
-		}
-		rigidbody.isKinematic = true;
-		rigidbody.detectCollisions = false;
-		projectParticles.Stop ();
-		hitParticles.Play ();
-		GetComponent<Collider>().isTrigger = true;
-		GetComponent<MeshRenderer>().enabled = false;
-	}
-
-//	void OnCollisionEnter (Collision col) {
-//		if (!networkView.isMine) {
-//			return;
-//		}
-////		Network.RemoveRPCs (networkView.viewID);
-////		Network.Destroy (gameObject);
-//		if (!col.collider.gameObject.GetComponentInParent<NetworkView>() ||
-//		    col.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) {
-//			networkView.RPC ("DetonateProjectile", RPCMode.AllBuffered);
-//		}
-//	}
 	
 }
