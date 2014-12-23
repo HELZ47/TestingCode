@@ -86,7 +86,7 @@ public class MovementController : MonoBehaviour {
 		case PlayerManager.MovementState.Jumping:
 			//Ascend-->goes up, Descend-->goes down
 			if (playerManager.jumpState == PlayerManager.JumpState.ASCENDING) {
-				print ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude);
+				//print ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude);
 				if ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude < maxWalkingSpeed*1.5f) {
 					maxMidAirSpeed = maxWalkingSpeed;
 				}

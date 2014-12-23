@@ -60,13 +60,19 @@ public class Launch_Projectile : MonoBehaviour {
 
 			GameObject fireBall;
 			if (rightTriggerDown) {
-				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Bullet"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+				//fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Bullet"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Bullet", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
 			else if (Input.GetButtonDown ("Mac_RightBumper")) {
-				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Grenade"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+//				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Grenade"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Grenade", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
 			else if (Input.GetButtonDown ("Mac_LeftBumper")) {
-				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+//				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
 			else {
 				//fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), ProjectileGroup) as GameObject;

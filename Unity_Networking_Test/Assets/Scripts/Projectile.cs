@@ -145,7 +145,7 @@ public class Projectile : MonoBehaviour {
 				if (hitInfo.collider != this.collider &&
 				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
 				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
-				    !isHit) {
+				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
 					//rigidbody.velocity = Vector3.zero;
 					rigidbody.isKinematic = true;
@@ -180,7 +180,7 @@ public class Projectile : MonoBehaviour {
 				if (hitInfo.collider != this.collider &&
 				    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
 				 	hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner &&
-				    !isHit) {
+				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
 					//rigidbody.velocity = Vector3.zero;
 					rigidbody.isKinematic = true;
