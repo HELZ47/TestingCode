@@ -8,6 +8,7 @@ public class ThirdPersonCamera : MonoBehaviour {
 	public float mouseXSensitivity, mouseYSensitivity;
 	float joystickXSensitivity, joystickYSensitivity;
 	Vector3 prevMousePosition, currentMousePosition;
+	float initialFOV;
 
 
 	// Use this for initialization
@@ -16,6 +17,7 @@ public class ThirdPersonCamera : MonoBehaviour {
 		prevMousePosition = currentMousePosition;
 		joystickXSensitivity = mouseXSensitivity * 3f;
 		joystickYSensitivity = mouseYSensitivity * 3f;
+		initialFOV = camera.fieldOfView;
 	}
 
 
@@ -38,6 +40,7 @@ public class ThirdPersonCamera : MonoBehaviour {
 
 		//Debug: implement controller for the camera movement-------------
 		if (Input.GetAxis ("Mac_RightXAxis") != 0) {
+			joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
 			angle = Input.GetAxis ("Mac_RightXAxis") * joystickXSensitivity;
 		}
 		//----------------------------------------------------------------
@@ -59,6 +62,7 @@ public class ThirdPersonCamera : MonoBehaviour {
 
 		//Debug: implement controller for the camera movement-------------
 		if (Input.GetAxis ("Mac_RightYAxis") != 0) {
+			joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
 			angle = Input.GetAxis ("Mac_RightYAxis") * joystickYSensitivity;
 		}
 		//----------------------------------------------------------------
