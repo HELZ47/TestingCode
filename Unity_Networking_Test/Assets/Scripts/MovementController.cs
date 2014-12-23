@@ -86,7 +86,8 @@ public class MovementController : MonoBehaviour {
 		case PlayerManager.MovementState.Jumping:
 			//Ascend-->goes up, Descend-->goes down
 			if (playerManager.jumpState == PlayerManager.JumpState.ASCENDING) {
-				if ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude < maxWalkingSpeed*1.25f) {
+				print ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude);
+				if ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude < maxWalkingSpeed*1.5f) {
 					maxMidAirSpeed = maxWalkingSpeed;
 				}
 				else  {
@@ -142,17 +143,17 @@ public class MovementController : MonoBehaviour {
 		//------------------------------------------------------------------------------------
 
 
-		if (Input.GetKey(KeyCode.W) || Input.GetAxis("Mac_LeftYAxis") > 0f) {
+		if (Input.GetKey(KeyCode.W) || Input.GetAxis("Mac_LeftYAxis") > 0.35f) {
 			keysPressed++;
 			nextDirectionVector += forwardXZ;
 			playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD;
 		}
-		if (Input.GetKey(KeyCode.S) || Input.GetAxis("Mac_LeftYAxis") < 0f) {
+		if (Input.GetKey(KeyCode.S) || Input.GetAxis("Mac_LeftYAxis") < -0.35f) {
 			keysPressed++;
 			nextDirectionVector -= forwardXZ;
 			playerManager.movementDirection = PlayerManager.MovementDirection.BACKWARD;
 		}
-		if (Input.GetKey(KeyCode.A) || Input.GetAxis("Mac_LeftXAxis") < 0f) {
+		if (Input.GetKey(KeyCode.A) || Input.GetAxis("Mac_LeftXAxis") < -0.35f) {
 			keysPressed++;
 			nextDirectionVector -= rightXZ;
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
@@ -165,7 +166,7 @@ public class MovementController : MonoBehaviour {
 				playerManager.movementDirection = PlayerManager.MovementDirection.LEFT;
 			}
 		}
-		if (Input.GetKey(KeyCode.D) || Input.GetAxis("Mac_LeftXAxis") > 0f) {
+		if (Input.GetKey(KeyCode.D) || Input.GetAxis("Mac_LeftXAxis") > 0.35f) {
 			keysPressed++;
 			nextDirectionVector += rightXZ;
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {

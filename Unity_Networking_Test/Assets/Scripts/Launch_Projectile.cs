@@ -1,16 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Launch_Projectile : MonoBehaviour {
 
 	//Fields
 	bool rightTriggerDown, rightTriggerReset;
+	List<GameObject> launchedProjectiles;
+	int ProjectileGroup;
 
 
 	// Use this for initialization
 	void Start () {
 		rightTriggerDown = false;
 		rightTriggerReset = false;
+		launchedProjectiles = new List<GameObject> ();
 	}
 
 
@@ -19,7 +23,7 @@ public class Launch_Projectile : MonoBehaviour {
 		if (!networkView.isMine) {
 			return;
 		}
-		//print (Input.GetAxis("Mac_RightTrigger"));
+		ProjectileGroup = Random.Range (10000, 99999);
 		if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
 			rightTriggerDown = true;
 		}
@@ -65,11 +69,14 @@ public class Launch_Projectile : MonoBehaviour {
 				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
 			}
 			else {
-				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+				//fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), ProjectileGroup) as GameObject;
+				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
-			//Vector3 direction = GetComponentInChildren<ThirdPersonCamera>().cameraTarget.transform.position - GetComponentInChildren<ThirdPersonCamera>().transform.position;
-			Vector3 direction = (projectileTargetPosition - transform.position).normalized;
-			fireBall.GetComponent<Projectile>().InitVariables (direction.normalized, Network.player);
+			//launchedProjectiles.Add (fireBall.gameObject);
+			////Vector3 direction = GetComponentInChildren<ThirdPersonCamera>().cameraTarget.transform.position - GetComponentInChildren<ThirdPersonCamera>().transform.position;
+			//Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+			//fireBall.GetComponent<Projectile>().InitVariables (direction.normalized, Network.player, ProjectileGroup);
 		}
 
 		if (Input.GetMouseButton(1) || Input.GetAxis("Mac_LeftTrigger") > 0) {
@@ -83,6 +90,27 @@ public class Launch_Projectile : MonoBehaviour {
 			if (GetComponentInChildren<Camera>().fieldOfView > 60f) {
 				GetComponentInChildren<Camera>().fieldOfView = 60f;
 			}
+		}
+
+//		GameObject[] projectilesTBR = new GameObject[launchedProjectiles.Count];
+//		int i = 0;
+//		foreach (GameObject gObject in launchedProjectiles) {
+//			if (gObject.GetComponent<Projectile>().removeRPCs = true) {
+//				Network.RemoveRPCs (gObject.GetComponent<NetworkView>().viewID);
+//				projectilesTBR[i] = gObject;
+//				i++;
+//			}
+//		}
+//		for (int j = 0; j < projectilesTBR.Length; j++) {
+//			launchedProjectiles.Remove (projectilesTBR[j]);
+//		}
+	}
+
+	[RPC]
+	public void CreateProjectile (string source, Vector3 position, Quaternion rotation, Vector3 direction, NetworkPlayer np) {
+		if (Network.isServer) {
+			GameObject projectile = Network.Instantiate (Resources.Load(source), position, rotation, 0) as GameObject;
+			projectile.GetComponent<Projectile>().InitVariables (direction.normalized, np);
 		}
 	}
 }

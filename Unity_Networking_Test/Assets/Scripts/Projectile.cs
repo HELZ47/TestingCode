@@ -11,6 +11,8 @@ public class Projectile : MonoBehaviour {
 	public float bulletSpeed, grenadeSpeed, orbSpeed;
 	public float bulletGSpeed, grenadeGSpeed, orbGSpeed;
 	public NetworkPlayer owner;
+	public bool removeRPCs;
+	int RPCGroup;
 	Vector3 direction;
 	float speed, gSpeed, timeAlive;
 	bool isHit;
@@ -19,7 +21,6 @@ public class Projectile : MonoBehaviour {
 	void SetVariables (Vector3 givenDirection, NetworkPlayer ownerNP) {
 		direction = givenDirection.normalized;
 		owner = ownerNP;
-
 		switch (projectileType) {
 		case ProjectileType.BULLET:
 			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
@@ -31,6 +32,18 @@ public class Projectile : MonoBehaviour {
 			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
 			break;
 		}
+//		if (owner == Network.player) {
+//			print ("same player!");
+//		}
+//		else {
+//			print ("different player!");
+//		}
+//		if (networkView.group == RPCGroup) {
+//			print ("Same group!");
+//		}
+//		else {
+//			print ("Different group!");
+//		}
 	}
 
 
@@ -50,6 +63,7 @@ public class Projectile : MonoBehaviour {
 		hitParticles.Stop ();
 		isHit = false;
 		timeAlive = 0f;
+		removeRPCs = false;
 		
 		switch (projectileType) {
 		case ProjectileType.BULLET:
@@ -70,9 +84,14 @@ public class Projectile : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+//		if (!networkView.isMine) { //This is here because network.destroy can only be called once
+//			rigidbody.isKinematic = true;
+//			rigidbody.detectCollisions = false;
+//			GetComponent<Collider>().isTrigger = true;
+//		}
 	}
-
-
+	
+	
 	// Update is called once per frame
 	void Update () {
 		if (!networkView.isMine) { //This is here because network.destroy can only be called once
@@ -80,33 +99,58 @@ public class Projectile : MonoBehaviour {
 		}
 		if (isHit == true && !hitParticles.isPlaying) {
 			Network.RemoveRPCs (networkView.viewID);
+//			Network.RemoveRPCsInGroup (RPCGroup);
+			//print ("removing group " + RPCGroup);
+			//Network.RemoveRPCs (networkView.viewID);
+//			ownerLaunchProjectile.RemoveRPCs (networkView.viewID);
+//			DestroyProjectile (networkView.viewID);
+//			networkView.RPC ("DestroyProjectile", RPCMode.AllBuffered,networkView.viewID);
+			//removeRPCs = true;
 			Network.Destroy (gameObject);
+			//networkView.RPC ("DestroyProjectile", RPCMode.AllBuffered, networkView.viewID);
 		}
 		else if (isHit != true && timeAlive > lifeTime) {
 			Network.RemoveRPCs (networkView.viewID);
+//			Network.RemoveRPCsInGroup (RPCGroup);
+			//print ("removing group " + RPCGroup);
+			//Network.RemoveRPCs (networkView.viewID);
+//			ownerLaunchProjectile.RemoveRPCs (networkView.viewID);
+//			DestroyProjectile (networkView.viewID);
+			//networkView.RPC ("DestroyProjectile", RPCMode.AllBuffered, networkView.viewID);
+//			removeRPCs = true;
 			Network.Destroy (gameObject);
+			//networkView.RPC ("DestroyProjectile", RPCMode.AllBuffered, networkView.viewID);
 		}
 		else {
 			networkView.RPC ("DetectCollision", RPCMode.AllBuffered);
-
 		}
 	}
 
+	[RPC]
+	void DestroyProjectile (NetworkViewID id) {
+		if (networkView.isMine) {
+			Network.RemoveRPCs (id);
+			Network.Destroy (gameObject);
+		}
+//		else {
+//			networkView.RPC ("DestroyProjectile", RPCMode.Server, id);
+//		}
+	}
 
 	[RPC]
 	void DetectCollision () {
 		switch (projectileType) {
 		case ProjectileType.BULLET:
-			foreach (RaycastHit hitInfo in Physics.RaycastAll (transform.position, direction.normalized, 1f)) {
+			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (hitInfo.collider != this.collider &&
 				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
 				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
 				    !isHit) {
 					isHit = true;
-					rigidbody.velocity = Vector3.zero;
+					//rigidbody.velocity = Vector3.zero;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
-					transform.position = hitInfo.point;
+					//transform.position = hitInfo.point;
 					projectParticles.Stop ();
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
@@ -132,16 +176,16 @@ public class Projectile : MonoBehaviour {
 			}
 			break;
 		case ProjectileType.GRENADE:
-			foreach (RaycastHit hitInfo in Physics.RaycastAll (transform.position, direction.normalized, 1f)) {
+			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (hitInfo.collider != this.collider &&
 				    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
 				 	hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner &&
 				    !isHit) {
 					isHit = true;
-					rigidbody.velocity = Vector3.zero;
+					//rigidbody.velocity = Vector3.zero;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
-					transform.position = hitInfo.point;
+					//transform.position = hitInfo.point;
 					projectParticles.Stop ();
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
@@ -167,7 +211,7 @@ public class Projectile : MonoBehaviour {
 			}
 			if (!isHit && timeAlive > lifeTime) {
 				isHit = true;
-				rigidbody.velocity = Vector3.zero;
+				//rigidbody.velocity = Vector3.zero;
 				rigidbody.isKinematic = true;
 				rigidbody.detectCollisions = false;
 				projectParticles.Stop ();
@@ -177,16 +221,16 @@ public class Projectile : MonoBehaviour {
 			}
 			break;
 		case ProjectileType.ORB:
-			foreach (RaycastHit hitInfo in Physics.RaycastAll (transform.position, direction.normalized, 1f)) {
+			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (hitInfo.collider != this.collider &&
 				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
 				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
-				    !isHit) {
+				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
-					rigidbody.velocity = Vector3.zero;
+					//rigidbody.velocity = Vector3.zero;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
-					transform.position = hitInfo.point;
+					//transform.position = hitInfo.point;
 					projectParticles.Stop ();
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
@@ -231,9 +275,9 @@ public class Projectile : MonoBehaviour {
 	}
 
 //	void OnCollisionEnter (Collision col) {
-////		if (!networkView.isMine) {
-////			return;
-////		}
+//		if (!networkView.isMine) {
+//			return;
+//		}
 ////		Network.RemoveRPCs (networkView.viewID);
 ////		Network.Destroy (gameObject);
 //		if (!col.collider.gameObject.GetComponentInParent<NetworkView>() ||
