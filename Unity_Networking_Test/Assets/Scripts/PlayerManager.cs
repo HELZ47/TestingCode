@@ -29,6 +29,25 @@ public class PlayerManager : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-
+		//if (networkView.isMine) {
+			ParticleSystem projectParticles = GetComponent<ParticleSystem>();
+			//Debug----------------------------
+			ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
+			int numOfParticles = projectParticles.GetParticles (particles);
+			Vector3 pVelocity = rigidbody.velocity * -1f;
+			if (pVelocity.magnitude > 2f) {
+				pVelocity = pVelocity.normalized * 2f;
+			}
+			if (pVelocity.magnitude < 1f) {
+				pVelocity = new Vector3 (0, 2f, 0);
+			}
+			int i = 0;
+			while (i<numOfParticles) {
+				particles[i].velocity = pVelocity;
+				i++;
+			}
+			projectParticles.SetParticles (particles, numOfParticles);
+			//---------------------------------
+		//}
 	}
 }
