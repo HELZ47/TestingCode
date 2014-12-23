@@ -22,7 +22,7 @@ public class MovementController : MonoBehaviour {
 	void Update () {
 		//Skip the rest if this player is not mine
 		if (!GetComponentInParent<NetworkView>().isMine) {
-			return;
+			return;	
 		}
 		CheckInput();
 		//print ("current speed: " + rigidbody.velocity.magnitude);
@@ -126,17 +126,33 @@ public class MovementController : MonoBehaviour {
 		int keysPressed = 0;
 		Vector3 nextDirectionVector = new Vector3 ();
 
-		if (Input.GetKey(KeyCode.W)) {
+
+		
+		//Debug: Print out the names of the controllers detected ----------------------------
+//		string[] joystickNames = Input.GetJoystickNames ();
+//		foreach (string name in joystickNames) {
+//			print (name);
+//		}
+//		if (joystickNames.Length == 0) {
+//			print ("No controller connected!");
+//		}
+//		for (int i = 0; i < joystickNames.Length; i++) {
+//			print ("joystick " + i + ": " + joystickNames[i]);
+//		}
+		//------------------------------------------------------------------------------------
+
+
+		if (Input.GetKey(KeyCode.W) || Input.GetAxis("Mac_LeftYAxis") > 0f) {
 			keysPressed++;
 			nextDirectionVector += forwardXZ;
 			playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD;
 		}
-		if (Input.GetKey(KeyCode.S)) {
+		if (Input.GetKey(KeyCode.S) || Input.GetAxis("Mac_LeftYAxis") < 0f) {
 			keysPressed++;
 			nextDirectionVector -= forwardXZ;
 			playerManager.movementDirection = PlayerManager.MovementDirection.BACKWARD;
 		}
-		if (Input.GetKey(KeyCode.A)) {
+		if (Input.GetKey(KeyCode.A) || Input.GetAxis("Mac_LeftXAxis") < 0f) {
 			keysPressed++;
 			nextDirectionVector -= rightXZ;
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
@@ -149,7 +165,7 @@ public class MovementController : MonoBehaviour {
 				playerManager.movementDirection = PlayerManager.MovementDirection.LEFT;
 			}
 		}
-		if (Input.GetKey(KeyCode.D)) {
+		if (Input.GetKey(KeyCode.D) || Input.GetAxis("Mac_LeftXAxis") > 0f) {
 			keysPressed++;
 			nextDirectionVector += rightXZ;
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
@@ -165,7 +181,7 @@ public class MovementController : MonoBehaviour {
 
 		if (keysPressed > 0 && playerManager.movementState != PlayerManager.MovementState.Jumping) {
 			directionVector = nextDirectionVector;
-			if (Input.GetKey(KeyCode.LeftShift)) {
+			if (Input.GetKey(KeyCode.LeftShift) || new Vector2 (Input.GetAxis ("Mac_LeftXAxis"), Input.GetAxis("Mac_LeftYAxis")).magnitude > 0.85f) {
 				playerManager.movementState = PlayerManager.MovementState.RUNNING;
 			}
 			else {
@@ -181,7 +197,7 @@ public class MovementController : MonoBehaviour {
 		}
 
 		
-		if (Input.GetKeyDown (KeyCode.Space) && playerManager.movementState != PlayerManager.MovementState.Jumping) {
+		if ((Input.GetKeyDown (KeyCode.Space)||Input.GetButtonDown("Mac_A")) && playerManager.movementState != PlayerManager.MovementState.Jumping) {
 			directionVector = nextDirectionVector;
 			playerManager.movementState = PlayerManager.MovementState.Jumping;
 			playerManager.jumpState = PlayerManager.JumpState.ASCENDING;

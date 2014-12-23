@@ -6,6 +6,7 @@ public class ThirdPersonCamera : MonoBehaviour {
 	//Fields
 	public Transform cameraTarget;
 	public float mouseXSensitivity, mouseYSensitivity;
+	float joystickXSensitivity, joystickYSensitivity;
 	Vector3 prevMousePosition, currentMousePosition;
 
 
@@ -13,6 +14,8 @@ public class ThirdPersonCamera : MonoBehaviour {
 	void Start () {
 		currentMousePosition = Input.mousePosition;
 		prevMousePosition = currentMousePosition;
+		joystickXSensitivity = mouseXSensitivity * 3f;
+		joystickYSensitivity = mouseYSensitivity * 3f;
 	}
 
 
@@ -29,8 +32,15 @@ public class ThirdPersonCamera : MonoBehaviour {
 		Vector3 mousePosDifference = currentMousePosition - prevMousePosition;
 
 
+
 		float angle = mousePosDifference.x / 30f;
 		angle = Input.GetAxis ("Mouse X") * mouseXSensitivity;
+
+		//Debug: implement controller for the camera movement-------------
+		if (Input.GetAxis ("Mac_RightXAxis") != 0) {
+			angle = Input.GetAxis ("Mac_RightXAxis") * joystickXSensitivity;
+		}
+		//----------------------------------------------------------------
 
 		//Debug
 //		if (angle > 0) {
@@ -46,6 +56,13 @@ public class ThirdPersonCamera : MonoBehaviour {
 
 		float yAxisAngle = Vector3.Angle ((cameraTarget.transform.position - transform.position), Vector3.up);
 		angle = Input.GetAxis ("Mouse Y") * mouseYSensitivity;
+
+		//Debug: implement controller for the camera movement-------------
+		if (Input.GetAxis ("Mac_RightYAxis") != 0) {
+			angle = Input.GetAxis ("Mac_RightYAxis") * joystickYSensitivity;
+		}
+		//----------------------------------------------------------------
+
 		if (angle > 0) {
 			if (yAxisAngle + angle <= 120) {
 				transform.RotateAround (cameraTarget.transform.position, transform.TransformDirection (Vector3.right), angle*YDirection);

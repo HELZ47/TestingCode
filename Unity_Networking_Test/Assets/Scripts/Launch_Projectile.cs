@@ -4,11 +4,13 @@ using System.Collections;
 public class Launch_Projectile : MonoBehaviour {
 
 	//Fields
+	bool rightTriggerDown, rightTriggerReset;
 
 
 	// Use this for initialization
 	void Start () {
-	
+		rightTriggerDown = false;
+		rightTriggerReset = false;
 	}
 
 
@@ -17,8 +19,21 @@ public class Launch_Projectile : MonoBehaviour {
 		if (!networkView.isMine) {
 			return;
 		}
+		//print (Input.GetAxis("Mac_RightTrigger"));
+		if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
+			rightTriggerDown = true;
+		}
+		else if (rightTriggerDown && Input.GetAxis("Mac_RightTrigger") > -1) {
+			rightTriggerDown = false;
+			rightTriggerReset = false;
+		}
+		else if (rightTriggerReset == false && Input.GetAxis("Mac_RightTrigger") == -1) {
+			rightTriggerReset = true;
+		}
 		//Mouse Buttons: 0-->Left, 1-->right, 2-->wheel
-		if (Input.GetMouseButtonDown (0)) {
+		bool launched = rightTriggerDown || Input.GetButtonDown ("Mac_RightBumper") ||
+			Input.GetButtonDown ("Mac_LeftBumper");
+		if (Input.GetMouseButtonDown (0) || launched) {
 
 
 			ThirdPersonCamera TPCamera = GetComponentInChildren<ThirdPersonCamera>();
@@ -39,13 +54,25 @@ public class Launch_Projectile : MonoBehaviour {
 				//print ("Target Too Far!");
 			}
 
-			GameObject fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+			GameObject fireBall;
+			if (rightTriggerDown) {
+				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Bullet"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+			}
+			else if (Input.GetButtonDown ("Mac_RightBumper")) {
+				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Grenade"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+			}
+			else if (Input.GetButtonDown ("Mac_LeftBumper")) {
+				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+			}
+			else {
+				fireBall =  Network.Instantiate (Resources.Load("Prefabs/Fire_Orb"), transform.position+(projectileDirection), new Quaternion(), 0) as GameObject;
+			}
 			//Vector3 direction = GetComponentInChildren<ThirdPersonCamera>().cameraTarget.transform.position - GetComponentInChildren<ThirdPersonCamera>().transform.position;
 			Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 			fireBall.GetComponent<Projectile>().InitVariables (direction.normalized, Network.player);
 		}
 
-		if (Input.GetMouseButton(1)) {
+		if (Input.GetMouseButton(1) || Input.GetAxis("Mac_LeftTrigger") > 0) {
 			GetComponentInChildren<Camera>().fieldOfView -= 200f * Time.deltaTime;
 			if (GetComponentInChildren<Camera>().fieldOfView < 30f) {
 				GetComponentInChildren<Camera>().fieldOfView = 30f;

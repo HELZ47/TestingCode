@@ -26,7 +26,6 @@ public class FirstPersonKeys : MonoBehaviour {
 		else {
 			activated = true;
 		}
-
 		CheckInput ();
 	}
 
@@ -37,11 +36,14 @@ public class FirstPersonKeys : MonoBehaviour {
 		int keysPressed = 0;
 		Vector3 directionVector = new Vector3 ();
 
+
 		if (Input.GetKey(KeyCode.W)) {
 			keysPressed++;
+			print ("hahaha");
 		}
 		if (Input.GetKey(KeyCode.S)) {
 			keysPressed++;
+			print ("hahaha");
 		}
 		if (Input.GetKey(KeyCode.A)) {
 			keysPressed++;

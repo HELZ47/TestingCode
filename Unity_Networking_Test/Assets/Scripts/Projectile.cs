@@ -230,16 +230,16 @@ public class Projectile : MonoBehaviour {
 		GetComponent<MeshRenderer>().enabled = false;
 	}
 
-	void OnCollisionEnter (Collision col) {
-//		if (!networkView.isMine) {
-//			return;
+//	void OnCollisionEnter (Collision col) {
+////		if (!networkView.isMine) {
+////			return;
+////		}
+////		Network.RemoveRPCs (networkView.viewID);
+////		Network.Destroy (gameObject);
+//		if (!col.collider.gameObject.GetComponentInParent<NetworkView>() ||
+//		    col.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) {
+//			networkView.RPC ("DetonateProjectile", RPCMode.AllBuffered);
 //		}
-//		Network.RemoveRPCs (networkView.viewID);
-//		Network.Destroy (gameObject);
-		if (!col.collider.gameObject.GetComponentInParent<NetworkView>() ||
-		    col.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) {
-			networkView.RPC ("DetonateProjectile", RPCMode.AllBuffered);
-		}
-	}
+//	}
 	
 }

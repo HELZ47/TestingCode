@@ -5,7 +5,7 @@ public class GlobalSettings : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
+		Application.targetFrameRate = 60;
 		Screen.lockCursor = true;
 	}
 	
