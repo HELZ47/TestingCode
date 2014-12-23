@@ -37,6 +37,12 @@ public class MovementController : MonoBehaviour {
 			return;
 		}
 
+		//Debug-----------------------------------------------------------
+		if (playerManager.powerState != PlayerManager.PowerState.Normal) {
+			return;
+		}
+		//----------------------------------------------------------------
+
 		/*If the player is moving, rotate the player object slowly towards the direction of the camera*/
 		if (playerManager.movementState == PlayerManager.MovementState.WALKING || playerManager.movementState == PlayerManager.MovementState.RUNNING ||
 		    playerManager.movementState == PlayerManager.MovementState.Jumping) {

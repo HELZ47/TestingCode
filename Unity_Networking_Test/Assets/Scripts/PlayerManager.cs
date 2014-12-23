@@ -10,7 +10,10 @@ public class PlayerManager : MonoBehaviour {
 	public JumpState jumpState;
 	public enum MovementDirection { FORWARD, BACKWARD, LEFT, RIGHT, FORWARD_LEFT, FORWARD_RIGHT, BACKWARD_LEFT, BACKWARD_RIGHT }
 	public MovementDirection movementDirection;
+	public enum PowerState { Normal, Boost };
+	public PowerState powerState;
 	public Camera mainCamera;
+	public float particleSize;
 	//public bool activated;
 
 
@@ -18,6 +21,7 @@ public class PlayerManager : MonoBehaviour {
 	void Start () {
 		movementState = MovementState.IDLE;
 		mainCamera = GetComponentInChildren<Camera> ();
+		powerState = PowerState.Normal;
 //		if (networkView.isMine) {
 //			activated = true;
 //		}
@@ -35,11 +39,11 @@ public class PlayerManager : MonoBehaviour {
 			ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
 			int numOfParticles = projectParticles.GetParticles (particles);
 			Vector3 pVelocity = rigidbody.velocity * -1f;
-			if (pVelocity.magnitude > 2f) {
-				pVelocity = pVelocity.normalized * 2f;
+			if (pVelocity.magnitude > particleSize) {
+				pVelocity = pVelocity.normalized * particleSize;
 			}
 			if (pVelocity.magnitude < 1f) {
-				pVelocity = new Vector3 (0, 2f, 0);
+				pVelocity = new Vector3 (0, particleSize, 0);
 			}
 			int i = 0;
 			while (i<numOfParticles) {
