@@ -28,7 +28,7 @@ public class Launch_Projectile : MonoBehaviour {
 		    Application.platform == RuntimePlatform.OSXEditor ||
 		    Application.platform == RuntimePlatform.OSXPlayer ||
 		    Application.platform == RuntimePlatform.OSXWebPlayer) {
-			leftTrigger = Input.GetAxis ("Mac_LeftTrigger") > -1;
+			leftTrigger = Input.GetAxis ("Mac_LeftTrigger") > 0;
 			leftBumper = Input.GetButtonDown ("Mac_LeftBumper");
 			rightBumper = Input.GetButtonDown ("Mac_RightBumper");
 			//Testing if the right trigger has been pulled from its resting position (like getButtonDown)

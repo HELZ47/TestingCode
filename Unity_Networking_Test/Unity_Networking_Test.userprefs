@@ -1,12 +1,8 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Launch_Projectile.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Launch_Projectile.cs">
     <Files>
-      <File FileName="Assets\Scripts\PlayerManager.cs" Line="55" Column="6" />
-      <File FileName="Assets\Scripts\ThirdPersonCamera.cs" Line="82" Column="3" />
-      <File FileName="Assets\Scripts\PowerManager.cs" Line="42" Column="61" />
-      <File FileName="Assets\Scripts\MovementController.cs" Line="142" Column="59" />
-      <File FileName="Assets\Scripts\Launch_Projectile.cs" Line="25" Column="51" />
+      <File FileName="Assets/Scripts/Launch_Projectile.cs" Line="31" Column="55" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
