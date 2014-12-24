@@ -254,7 +254,7 @@ public class AnimationController : MonoBehaviour {
 				//}
 				break;
 			}
-			networkView.RPC ("UpdateAnimation", RPCMode.AllBuffered, direction, movementType, jump);
+			networkView.RPC ("UpdateAnimation", RPCMode.All, direction, movementType, jump);
 		}
 	}
 }

@@ -1,21 +1,29 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 //The script the controls the projectile
 public class Projectile : MonoBehaviour {
 
 	//Fields
 	public enum ProjectileType { BULLET, GRENADE, ORB }
+	public enum DamageElement { PHYSICAL, FIRE, WATER, ICE, ELECTRIC };
+	public enum DamageType { DIRECT, SPLASH }
 	public ProjectileType projectileType;
 	public ParticleSystem projectParticles, hitParticles;
 	public float lifeTime, speed;
+	public DamageElement damageElement;
+	public DamageType damageType;
+	public float damageAmount;
+	public float splashDamageRange;
+	List<GameObject> damageReceivers;
 	NetworkPlayer owner;
 	int RPCGroup;
 	Vector3 direction;
 	float timeAlive;
 	bool isHit;
 
-	
+	#region Initialization
 	[RPC]
 	//RPC calls that sets the variables, this is called when the object is initialized
 	void SetVariables (Vector3 givenDirection, NetworkPlayer ownerNP) {
@@ -48,14 +56,16 @@ public class Projectile : MonoBehaviour {
 		hitParticles.Stop (); //Stop explosion particles
 		isHit = false; //Set the isHit flag to false
 		timeAlive = 0f; //Initialize the time alive
+		damageReceivers = new List<GameObject> ();
 	}
 
 
 	// Use this for initialization
 	void Start () {
 	}
-	
-	
+	#endregion
+
+
 	// Update is called once per frame
 	void Update () {
 		if (!networkView.isMine) { //This is here because network.destroy can only be called once
@@ -63,11 +73,23 @@ public class Projectile : MonoBehaviour {
 		}
 		//If the projectile hit something and the explosion animation stopped, destoy the projectile
 		if (isHit == true && !hitParticles.isPlaying) {
+			foreach (GameObject dr in damageReceivers) {
+				HealthManager hpManager = dr.GetComponent<HealthManager>();
+				if (hpManager != null) {
+					hpManager.ReceiveDamage (damageAmount, damageType, damageElement);
+				}
+			}
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
 		}
 		//If the projectile did not hit anything, but it has outlived its lifetime
 		else if (isHit != true && timeAlive > lifeTime) {
+			foreach (GameObject dr in damageReceivers) {
+				HealthManager hpManager = dr.GetComponent<HealthManager>();
+				if (hpManager != null) {
+					hpManager.ReceiveDamage (damageAmount, damageType, damageElement);
+				}
+			}
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
 		}
@@ -86,7 +108,8 @@ public class Projectile : MonoBehaviour {
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (hitInfo.collider != this.collider &&
 				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
-				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
+				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
+				 	 hitInfo.collider.tag == "Mobs") &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
 					rigidbody.isKinematic = true;
@@ -95,6 +118,7 @@ public class Projectile : MonoBehaviour {
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
 					GetComponent<MeshRenderer>().enabled = false;
+					damageReceivers.Add (hitInfo.gameObject);
 				}
 			}
 			if (!isHit) {
@@ -119,7 +143,8 @@ public class Projectile : MonoBehaviour {
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (hitInfo.collider != this.collider &&
 				    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
-				 	hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner &&
+				 	(hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
+				 	 hitInfo.collider.tag == "Mobs") &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
 					rigidbody.isKinematic = true;
@@ -128,6 +153,18 @@ public class Projectile : MonoBehaviour {
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
 					GetComponent<MeshRenderer>().enabled = false;
+				}
+			}
+			if (isHit) {
+				damageReceivers.Clear();
+				foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, splashDamageRange)) {
+					if (hitInfo.collider != this.collider &&
+					    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
+					    (hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
+					 	 hitInfo.collider.tag == "Mobs") &&
+					    hitInfo.collider.tag != "Projectiles") {
+						damageReceivers.Add (hitInfo.gameObject);
+					}
 				}
 			}
 			if (!isHit) {
@@ -161,7 +198,8 @@ public class Projectile : MonoBehaviour {
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (hitInfo.collider != this.collider &&
 				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
-				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner) &&
+				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
+				 	 hitInfo.collider.tag == "Mobs") &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
 					rigidbody.isKinematic = true;
@@ -170,6 +208,18 @@ public class Projectile : MonoBehaviour {
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
 					GetComponent<MeshRenderer>().enabled = false;
+				}
+			}
+			if (isHit) {
+				damageReceivers.Clear();
+				foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, splashDamageRange)) {
+					if (hitInfo.collider != this.collider &&
+					    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
+					    (hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
+					 hitInfo.collider.tag == "Mobs") &&
+					    hitInfo.collider.tag != "Projectiles") {
+						damageReceivers.Add (hitInfo.gameObject);
+					}
 				}
 			}
 			if (!isHit) {

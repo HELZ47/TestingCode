@@ -1,8 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Launch_Projectile.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/HealthManager.cs">
     <Files>
-      <File FileName="Assets/Scripts/Launch_Projectile.cs" Line="31" Column="55" />
+      <File FileName="Assets/Scripts/Projectile.cs" Line="92" Column="5" />
+      <File FileName="Assets/Scripts/HealthManager.cs" Line="34" Column="71" />
+      <File FileName="Assets/Scripts/AnimationController.cs" Line="257" Column="51" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
