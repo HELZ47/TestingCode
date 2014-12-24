@@ -7,12 +7,14 @@ public class HealthManager : MonoBehaviour {
 	//Fields
 	public float hitPoints;
 	public float armourValue;
-	float fullHPAmount;
+	public float fullHPAmount;
 
+	void Awake () {
+		fullHPAmount = hitPoints;
+	}
 
 	// Use this for initialization
 	void Start () {
-		fullHPAmount = hitPoints;
 	}
 
 
@@ -23,10 +25,10 @@ public class HealthManager : MonoBehaviour {
 		renderer.material.color = hColor;
 
 		if (networkView.isMine) {
-			if (hitPoints < 0) {
+			if (hitPoints <= 0) {
 //				Network.RemoveRPCs (networkView.viewID);
 //				Network.Destroy (gameObject);
-				networkView.RPC ("DeathForObject", RPCMode.AllBuffered);
+				networkView.RPC ("DeathForObject", RPCMode.AllBuffered); //Not fully working
 			}
 		}
 	}
