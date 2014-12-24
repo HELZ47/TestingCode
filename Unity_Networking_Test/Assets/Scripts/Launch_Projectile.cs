@@ -21,13 +21,14 @@ public class Launch_Projectile : MonoBehaviour {
 			return;
 		}
 
-		//Debug: Print out the names of the controllers detected -----------------------------
+		//Debug: Get the controller's input based on the OS version -----------------------------
+		//Mac OS: triggers -1->1  Windows: triggers 0->1
 		bool leftTrigger = false, leftBumper = false, rightBumper = false;
 		if (Application.platform == RuntimePlatform.OSXDashboardPlayer ||
 		    Application.platform == RuntimePlatform.OSXEditor ||
 		    Application.platform == RuntimePlatform.OSXPlayer ||
 		    Application.platform == RuntimePlatform.OSXWebPlayer) {
-			leftTrigger = Input.GetAxis ("Mac_LeftTrigger") > 0;
+			leftTrigger = Input.GetAxis ("Mac_LeftTrigger") > -1;
 			leftBumper = Input.GetButtonDown ("Mac_LeftBumper");
 			rightBumper = Input.GetButtonDown ("Mac_RightBumper");
 			//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
@@ -49,16 +50,19 @@ public class Launch_Projectile : MonoBehaviour {
 			leftBumper = Input.GetButtonDown ("Windows_LeftBumper");
 			rightBumper = Input.GetButtonDown ("Windows_RightBumper");
 			//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
-			if (Input.GetAxis("Windows_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
+			if (Input.GetAxis("Windows_RightTrigger") > 0 && rightTriggerDown == false && rightTriggerReset == true) {
 				rightTriggerDown = true;
 			}
-			else if (rightTriggerDown && Input.GetAxis("Windows_RightTrigger") > -1) {
+			else if (rightTriggerDown && Input.GetAxis("Windows_RightTrigger") > 0) {
 				rightTriggerDown = false;
 				rightTriggerReset = false;
 			}
-			else if (rightTriggerReset == false && Input.GetAxis("Windows_RightTrigger") == -1) {
+			else if (rightTriggerReset == false && Input.GetAxis("Windows_RightTrigger") == 0) {
 				rightTriggerReset = true;
 			}
+//			print ("right trigger down: " + rightTriggerDown);
+//			print ("right trigger reset: " + rightTriggerReset);
+			//print ("right trigger value: " + Input.GetAxis ("Windows_RightTrigger"));
 		}
 		//------------------------------------------------------------------------------------
 
