@@ -8,7 +8,7 @@ public class SpawnMob : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		if (Network.isServer) {
-			Network.Instantiate (Resources.Load ("Prefabs/Dummy"), transform.position + Vector3.up, new Quaternion(), 0);
+			Network.Instantiate (Resources.Load ("Prefabs/Zombie"), transform.position, new Quaternion(), 0);
 		}
 	}
 	

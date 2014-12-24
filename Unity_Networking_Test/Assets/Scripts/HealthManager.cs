@@ -22,7 +22,12 @@ public class HealthManager : MonoBehaviour {
 	void Update () {
 		float remainingHPRatio = hitPoints / fullHPAmount;
 		Color hColor = new Color (remainingHPRatio, remainingHPRatio, remainingHPRatio);
-		renderer.material.color = hColor;
+		if (GetComponent<Renderer>() != null) {
+			renderer.material.color = hColor;
+		}
+		else if (GetComponentInChildren<Renderer>() != null) {
+			GetComponentInChildren<Renderer>().material.color = hColor;
+		}
 
 		if (Network.isServer) {
 			if (hitPoints <= 0) {

@@ -74,9 +74,11 @@ public class Projectile : MonoBehaviour {
 		//If the projectile hit something and the explosion animation stopped, destoy the projectile
 		if (isHit == true && !hitParticles.isPlaying) {
 			foreach (GameObject dr in damageReceivers) {
-				HealthManager hpManager = dr.GetComponent<HealthManager>();
-				if (hpManager != null) {
-					hpManager.ReceiveDamage (damageAmount, damageType, damageElement);
+				if (dr != null) {
+					HealthManager hpManager = dr.GetComponent<HealthManager>();
+					if (hpManager != null) {
+						hpManager.ReceiveDamage (damageAmount, damageType, damageElement);
+					}
 				}
 			}
 			Network.RemoveRPCs (networkView.viewID);
