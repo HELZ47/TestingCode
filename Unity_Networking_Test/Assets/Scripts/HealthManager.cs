@@ -24,11 +24,11 @@ public class HealthManager : MonoBehaviour {
 		Color hColor = new Color (remainingHPRatio, remainingHPRatio, remainingHPRatio);
 		renderer.material.color = hColor;
 
-		if (networkView.isMine) {
+		if (Network.isServer) {
 			if (hitPoints <= 0) {
-//				Network.RemoveRPCs (networkView.viewID);
-//				Network.Destroy (gameObject);
-				networkView.RPC ("DeathForObject", RPCMode.AllBuffered); //Not fully working
+				Network.RemoveRPCs (networkView.viewID);
+				Network.Destroy (gameObject);
+				//networkView.RPC ("DeathForObject", RPCMode.AllBuffered); //Not fully working
 			}
 		}
 	}
