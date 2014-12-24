@@ -38,11 +38,30 @@ public class ThirdPersonCamera : MonoBehaviour {
 		float angle = mousePosDifference.x / 30f;
 		angle = Input.GetAxis ("Mouse X") * mouseXSensitivity;
 
-		//Debug: implement controller for the camera movement-------------
-		if (Input.GetAxis ("Mac_RightXAxis") != 0) {
-			joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
-			angle = Input.GetAxis ("Mac_RightXAxis") * joystickXSensitivity;
+		//Debug: Print out the names of the controllers detected -----------------------------
+		if (Application.platform == RuntimePlatform.OSXDashboardPlayer ||
+		    Application.platform == RuntimePlatform.OSXEditor ||
+		    Application.platform == RuntimePlatform.OSXPlayer ||
+		    Application.platform == RuntimePlatform.OSXWebPlayer) {
+			if (Input.GetAxis ("Mac_RightXAxis") != 0) {
+				joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
+				angle = Input.GetAxis ("Mac_RightXAxis") * joystickXSensitivity;
+			}
 		}
+		else if (Application.platform == RuntimePlatform.WindowsEditor ||
+		         Application.platform == RuntimePlatform.WindowsPlayer ||
+		         Application.platform == RuntimePlatform.WindowsWebPlayer) {
+			if (Input.GetAxis ("Windows_RightXAxis") != 0) {
+				joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
+				angle = Input.GetAxis ("Windows_RightXAxis") * joystickXSensitivity;
+			}
+		}
+		//------------------------------------------------------------------------------------
+		//Debug: implement controller for the camera movement-------------
+//		if (Input.GetAxis ("Mac_RightXAxis") != 0) {
+//			joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
+//			angle = Input.GetAxis ("Mac_RightXAxis") * joystickXSensitivity;
+//		}
 		//----------------------------------------------------------------
 
 		//Debug
@@ -60,11 +79,29 @@ public class ThirdPersonCamera : MonoBehaviour {
 		float yAxisAngle = Vector3.Angle ((cameraTarget.transform.position - transform.position), Vector3.up);
 		angle = Input.GetAxis ("Mouse Y") * mouseYSensitivity;
 
-		//Debug: implement controller for the camera movement-------------
-		if (Input.GetAxis ("Mac_RightYAxis") != 0) {
-			joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
-			angle = Input.GetAxis ("Mac_RightYAxis") * joystickYSensitivity;
+		//Debug: Print out the names of the controllers detected -----------------------------
+		if (Application.platform == RuntimePlatform.OSXDashboardPlayer ||
+		    Application.platform == RuntimePlatform.OSXEditor ||
+		    Application.platform == RuntimePlatform.OSXPlayer ||
+		    Application.platform == RuntimePlatform.OSXWebPlayer) {
+			if (Input.GetAxis ("Mac_RightYAxis") != 0) {
+				joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
+				angle = Input.GetAxis ("Mac_RightYAxis") * joystickYSensitivity;
+			}
 		}
+		else if (Application.platform == RuntimePlatform.WindowsEditor ||
+		         Application.platform == RuntimePlatform.WindowsPlayer ||
+		         Application.platform == RuntimePlatform.WindowsWebPlayer) {
+			if (Input.GetAxis ("Windows_RightYAxis") != 0) {
+				joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
+				angle = Input.GetAxis ("Windows_RightYAxis") * joystickYSensitivity;
+			}
+		}
+		//Debug: implement controller for the camera movement-------------
+//		if (Input.GetAxis ("Mac_RightYAxis") != 0) {
+//			joystickXSensitivity = (camera.fieldOfView * mouseXSensitivity * 3f) / initialFOV;
+//			angle = Input.GetAxis ("Mac_RightYAxis") * joystickYSensitivity;
+//		}
 		//----------------------------------------------------------------
 
 		if (angle > 0) {

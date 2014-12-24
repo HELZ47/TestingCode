@@ -20,21 +20,62 @@ public class Launch_Projectile : MonoBehaviour {
 		if (!networkView.isMine) { //Skip this function if the object is not the player's
 			return;
 		}
-		//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
-		if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
-			rightTriggerDown = true;
+
+		//Debug: Print out the names of the controllers detected -----------------------------
+		bool leftTrigger = false, leftBumper = false, rightBumper = false;
+		if (Application.platform == RuntimePlatform.OSXDashboardPlayer ||
+		    Application.platform == RuntimePlatform.OSXEditor ||
+		    Application.platform == RuntimePlatform.OSXPlayer ||
+		    Application.platform == RuntimePlatform.OSXWebPlayer) {
+			leftTrigger = Input.GetAxis ("Mac_LeftTrigger") > 0;
+			leftBumper = Input.GetButtonDown ("Mac_LeftBumper");
+			rightBumper = Input.GetButtonDown ("Mac_RightBumper");
+			//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
+			if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
+				rightTriggerDown = true;
+			}
+			else if (rightTriggerDown && Input.GetAxis("Mac_RightTrigger") > -1) {
+				rightTriggerDown = false;
+				rightTriggerReset = false;
+			}
+			else if (rightTriggerReset == false && Input.GetAxis("Mac_RightTrigger") == -1) {
+				rightTriggerReset = true;
+			}
 		}
-		else if (rightTriggerDown && Input.GetAxis("Mac_RightTrigger") > -1) {
-			rightTriggerDown = false;
-			rightTriggerReset = false;
+		else if (Application.platform == RuntimePlatform.WindowsEditor ||
+		         Application.platform == RuntimePlatform.WindowsPlayer ||
+		         Application.platform == RuntimePlatform.WindowsWebPlayer) {
+			leftTrigger = Input.GetAxis ("Windows_LeftTrigger") > 0;
+			leftBumper = Input.GetButtonDown ("Windows_LeftBumper");
+			rightBumper = Input.GetButtonDown ("Windows_RightBumper");
+			//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
+			if (Input.GetAxis("Windows_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
+				rightTriggerDown = true;
+			}
+			else if (rightTriggerDown && Input.GetAxis("Windows_RightTrigger") > -1) {
+				rightTriggerDown = false;
+				rightTriggerReset = false;
+			}
+			else if (rightTriggerReset == false && Input.GetAxis("Windows_RightTrigger") == -1) {
+				rightTriggerReset = true;
+			}
 		}
-		else if (rightTriggerReset == false && Input.GetAxis("Mac_RightTrigger") == -1) {
-			rightTriggerReset = true;
-		}
+		//------------------------------------------------------------------------------------
+
+//		//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
+//		if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
+//			rightTriggerDown = true;
+//		}
+//		else if (rightTriggerDown && Input.GetAxis("Mac_RightTrigger") > -1) {
+//			rightTriggerDown = false;
+//			rightTriggerReset = false;
+//		}
+//		else if (rightTriggerReset == false && Input.GetAxis("Mac_RightTrigger") == -1) {
+//			rightTriggerReset = true;
+//		}
 		//Mouse Buttons: 0-->Left, 1-->right, 2-->wheel
 		//launched: rightTriggerDown or rightBumperDown or leftBumperDown
-		bool launched = rightTriggerDown || Input.GetButtonDown ("Mac_RightBumper") ||
-			Input.GetButtonDown ("Mac_LeftBumper");
+		bool launched = rightTriggerDown || rightBumper || leftBumper;
 		//If the corresponding input is pressed, launch the corresponding projectile
 		if (Input.GetMouseButtonDown (0) || launched) {
 			//Get the third person camera and it's target transform
@@ -60,11 +101,11 @@ public class Launch_Projectile : MonoBehaviour {
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Bullet", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
-			else if (Input.GetButtonDown ("Mac_RightBumper")) {
+			else if (rightBumper) {
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Grenade", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
-			else if (Input.GetButtonDown ("Mac_LeftBumper")) {
+			else if (leftBumper) {
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
@@ -76,7 +117,7 @@ public class Launch_Projectile : MonoBehaviour {
 		}
 
 		//Handles the zooming function with right mouse click or left trigger
-		if (Input.GetMouseButton(1) || Input.GetAxis("Mac_LeftTrigger") > 0) {
+		if (Input.GetMouseButton(1) || leftTrigger) {
 			GetComponentInChildren<Camera>().fieldOfView -= 200f * Time.deltaTime;
 			if (GetComponentInChildren<Camera>().fieldOfView < 30f) {
 				GetComponentInChildren<Camera>().fieldOfView = 30f;
