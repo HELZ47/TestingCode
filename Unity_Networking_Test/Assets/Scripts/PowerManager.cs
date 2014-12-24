@@ -13,6 +13,10 @@ public class PowerManager : MonoBehaviour {
 		playerManager = GetComponent<PlayerManager> ();
 	}
 
+	[RPC]
+	void ChangeParticleSize (float pSize) {
+		playerManager.particleSize = pSize;
+	}
 
 	// Update is called once per frame
 	void Update () {
@@ -35,14 +39,15 @@ public class PowerManager : MonoBehaviour {
 		}
 		//--------------------------------------------------------------------------------------
 
-		if ((activatePower || Input.GetKeyDown(KeyCode.Q)) && 
+		if ((activatePower || Input.GetKeyDown(KeyCode.LeftControl)) && 
 		    playerManager.powerState == PlayerManager.PowerState.Normal &&
 		    (rigidbody.velocity - new Vector3(0, rigidbody.velocity.y, 0)).magnitude > 1.5f) {
 			//print ("Power Up");
-			playerManager.particleSize = 10f;
+			playerManager.particleSize = 30f;
+			networkView.RPC ("ChangeParticleSize", RPCMode.All, 30f);
 			playerManager.powerState = PlayerManager.PowerState.Boost;
 			prePowerVelocity = rigidbody.velocity;
-			rigidbody.velocity = (rigidbody.velocity.normalized-new Vector3(0, rigidbody.velocity.normalized.y, 0)) * 50f;
+			rigidbody.velocity = (rigidbody.velocity.normalized-new Vector3(0, rigidbody.velocity.normalized.y, 0)) * 20f;
 			timer = 0f;
 		}
 		if (playerManager.powerState == PlayerManager.PowerState.Boost && timer < 0.2f) {
@@ -50,6 +55,7 @@ public class PowerManager : MonoBehaviour {
 		}
 		else if (playerManager.powerState == PlayerManager.PowerState.Boost && timer >= 0.2f) {
 			playerManager.particleSize = 2f;
+			networkView.RPC ("ChangeParticleSize", RPCMode.All, 2f);
 			playerManager.powerState = PlayerManager.PowerState.Normal;
 			rigidbody.velocity = prePowerVelocity;
 			timer = 0f;
