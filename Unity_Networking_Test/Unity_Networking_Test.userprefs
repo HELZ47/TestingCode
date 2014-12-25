@@ -1,12 +1,11 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/MobMovement.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/MobAnimationController.cs">
     <Files>
-      <File FileName="Assets/Scripts/MobMovement.cs" Line="30" Column="4" />
-      <File FileName="Assets/Scripts/SpawnMob.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Projectile.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/HealthManager.cs" Line="32" Column="84" />
-      <File FileName="Assets/Scripts/MovementController.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/MobMovement.cs" Line="84" Column="6" />
+      <File FileName="Assets/Scripts/HealthManager.cs" Line="50" Column="10" />
+      <File FileName="Assets/Scripts/MobAnimationController.cs" Line="12" Column="12" />
+      <File FileName="Assets/Scripts/Projectile.cs" Line="88" Column="50" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
