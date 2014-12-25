@@ -7,7 +7,7 @@ public class HealthManager : MonoBehaviour {
 	//Fields
 	public float hitPoints;
 	public float armourValue;
-	public bool isTakingDamage, isDead;
+	public bool isTakingDamage, isDead, deathAnimationFinished;
 	float fullHPAmount;
 
 	void Awake () {
@@ -32,8 +32,8 @@ public class HealthManager : MonoBehaviour {
 
 
 		if (Network.isServer) {
-			if (isDead && GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Death") &&
-			    GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.9f) {
+			if (isDead && deathAnimationFinished) {//GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Death") &&
+			    //GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.9f) {
 				Network.RemoveRPCs (networkView.viewID);
 				Network.Destroy (gameObject);
 				//networkView.RPC ("DeathForObject", RPCMode.AllBuffered); //Not fully working

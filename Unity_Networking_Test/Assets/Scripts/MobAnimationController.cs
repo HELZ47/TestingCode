@@ -46,6 +46,12 @@ public class MobAnimationController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+		if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Death") &&
+		    myAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.9f) {
+			GetComponent<HealthManager>().deathAnimationFinished = true;
+		}
+
 		if (networkView.isMine) {
 			if (GetComponent<HealthManager>().isTakingDamage) {
 				if (GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("ReceiveDamage")) {

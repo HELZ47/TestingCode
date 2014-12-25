@@ -7,11 +7,12 @@ public class Launch_Projectile : MonoBehaviour {
 
 	//Fields
 	bool rightTriggerDown, rightTriggerReset;
+	bool rightTriggerPressedOnce;
 	
 	// Use this for initialization
 	void Start () {
 		rightTriggerDown = false;
-		rightTriggerReset = false;
+		rightTriggerReset = true; //Make this true so that first trigger press creates projectile
 	}
 
 
@@ -20,7 +21,10 @@ public class Launch_Projectile : MonoBehaviour {
 		if (!networkView.isMine) { //Skip this function if the object is not the player's
 			return;
 		}
-
+		//On Mac, the controller's L/R triggers are initialized to 0 instead of -1, this fix that issue
+		if (Input.GetAxis("Mac_RightTrigger")>0 && rightTriggerPressedOnce == false) {
+			rightTriggerPressedOnce = true;
+		}
 		//Debug: Get the controller's input based on the OS version -----------------------------
 		//Mac OS: triggers -1->1  Windows: triggers 0->1
 		bool leftTrigger = false, leftBumper = false, rightBumper = false;
@@ -32,7 +36,8 @@ public class Launch_Projectile : MonoBehaviour {
 			leftBumper = Input.GetButtonDown ("Mac_LeftBumper");
 			rightBumper = Input.GetButtonDown ("Mac_RightBumper");
 			//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
-			if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
+			if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true &&
+			    rightTriggerPressedOnce) {
 				rightTriggerDown = true;
 			}
 			else if (rightTriggerDown && Input.GetAxis("Mac_RightTrigger") > -1) {
