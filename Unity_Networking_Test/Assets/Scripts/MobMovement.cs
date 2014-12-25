@@ -5,7 +5,9 @@ public class MobMovement : MonoBehaviour {
 
 	//Fields
 	public float suspicionRange, sightRange, investigateSpeed, chaseSpeed, acceleration;
-	bool targetAquired, isSuspicious;
+	public float attackRange;
+	public bool isAttacking;
+	public bool targetAquired, isSuspicious;
 	Vector3 targetPosition;
 
 	// Use this for initialization
@@ -15,7 +17,7 @@ public class MobMovement : MonoBehaviour {
 
 	//Rotation
 	void FixedUpdate () {
-		if (GetComponent<HealthManager>().isDead) {
+		if (GetComponent<HealthManager>().isDead || isAttacking) {
 			return;
 		}
 		if (targetAquired) {
@@ -59,6 +61,10 @@ public class MobMovement : MonoBehaviour {
 					targetPosition = col.gameObject.transform.position;
 				}
 			}
+		}
+		if (targetAquired && Vector3.Distance (transform.position, targetPosition) < attackRange) {
+			print ("Attack!!!");
+			isAttacking = true;
 		}
 	}
 }

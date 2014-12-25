@@ -29,14 +29,23 @@ public class MobAnimationController : MonoBehaviour {
 			GetComponent<Animator> ().SetBool ("isDead", true);
 		}
 
+		if (GetComponent<MobMovement>().isAttacking &&
+		    !GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
+			GetComponent<Animator> ().SetBool ("isAttacking", true);
+			GetComponent<MobMovement>().isAttacking = false;
+		}
+		else if (GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
+			GetComponent<Animator> ().SetBool ("isAttacking", false);
+		}
+
 		Animator animator = GetComponent<Animator> ();
 		MobMovement mobMovement = GetComponent<MobMovement> ();
 		speed = (rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude;
-		if (speed > mobMovement.investigateSpeed) {
+		if (mobMovement.targetAquired) {
 			animator.SetBool ("investigate", false);
 			animator.SetBool ("chase", true);
 		}
-		else if (speed > 0.1f) {
+		else if (mobMovement.isSuspicious) {
 			animator.SetBool ("investigate", true);
 			animator.SetBool ("chase", false);
 		}
