@@ -7,7 +7,8 @@ public class HealthManager : MonoBehaviour {
 	//Fields
 	public float hitPoints;
 	public float armourValue;
-	public float fullHPAmount;
+	public bool isTakingDamage, isDead;
+	float fullHPAmount;
 
 	void Awake () {
 		fullHPAmount = hitPoints;
@@ -29,8 +30,10 @@ public class HealthManager : MonoBehaviour {
 			GetComponentInChildren<Renderer>().material.color = hColor;
 		}
 
+
 		if (Network.isServer) {
-			if (hitPoints <= 0) {
+			if (isDead && GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Death") &&
+			    GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.8f) {
 				Network.RemoveRPCs (networkView.viewID);
 				Network.Destroy (gameObject);
 				//networkView.RPC ("DeathForObject", RPCMode.AllBuffered); //Not fully working
@@ -38,19 +41,20 @@ public class HealthManager : MonoBehaviour {
 		}
 	}
 
+
 	[RPC]
 	void ReduceHitpoint (float damage) {
 		hitPoints -= damage;
-	}
-
-	[RPC]
-	void DeathForObject () {
-		Network.Destroy (gameObject);
+		isTakingDamage = true;
+		if (hitPoints <= 0) {
+			isDead = true;
+		}
 	}
 
 	//Receives damage
 	public void ReceiveDamage (float damageAmount, Projectile.DamageType damageType, Projectile.DamageElement damageElement) {
 		//hitPoints -= damageAmount;
+		//GetComponent<Animator> ().SetBool ("receiveDamage", true);
 		networkView.RPC ("ReduceHitpoint", RPCMode.AllBuffered, damageAmount);
 	}
 }

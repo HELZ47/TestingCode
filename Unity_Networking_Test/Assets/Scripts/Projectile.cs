@@ -22,6 +22,7 @@ public class Projectile : MonoBehaviour {
 	Vector3 direction;
 	float timeAlive;
 	bool isHit;
+	bool damageDealt;
 
 	#region Initialization
 	[RPC]
@@ -57,6 +58,7 @@ public class Projectile : MonoBehaviour {
 		isHit = false; //Set the isHit flag to false
 		timeAlive = 0f; //Initialize the time alive
 		damageReceivers = new List<GameObject> ();
+		damageDealt = false;
 	}
 
 
@@ -72,7 +74,7 @@ public class Projectile : MonoBehaviour {
 			return;
 		}
 		//If the projectile hit something and the explosion animation stopped, destoy the projectile
-		if (isHit == true && !hitParticles.isPlaying) {
+		if (isHit == true && damageDealt == false) {
 			foreach (GameObject dr in damageReceivers) {
 				if (dr != null) {
 					HealthManager hpManager = dr.GetComponent<HealthManager>();
@@ -81,6 +83,9 @@ public class Projectile : MonoBehaviour {
 					}
 				}
 			}
+			damageDealt = true;
+		}
+		if (isHit == true && !hitParticles.isPlaying) {
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
 		}

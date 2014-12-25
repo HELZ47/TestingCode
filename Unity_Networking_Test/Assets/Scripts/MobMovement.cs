@@ -4,9 +4,9 @@ using System.Collections;
 public class MobMovement : MonoBehaviour {
 
 	//Fields
-	public float sightRange, speed;
-	public bool targetAquired;
-	public Vector3 targetPosition;
+	public float suspicionRange, sightRange, investigateSpeed, chaseSpeed, acceleration;
+	bool targetAquired, isSuspicious;
+	Vector3 targetPosition;
 
 	// Use this for initialization
 	void Start () {
@@ -15,44 +15,50 @@ public class MobMovement : MonoBehaviour {
 
 	//Rotation
 	void FixedUpdate () {
+		if (GetComponent<HealthManager>().isDead) {
+			return;
+		}
 		if (targetAquired) {
 			Vector3 direction = (targetPosition - transform.position).normalized;
 			direction = direction - new Vector3 (0, direction.y, 0);
 			transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
-			rigidbody.AddForce (direction * speed, ForceMode.Force);
-			print (rigidbody.velocity);
+			rigidbody.AddForce (direction * acceleration, ForceMode.Acceleration);
+			Vector3 temp = new Vector3 (rigidbody.velocity.x, 0, rigidbody.velocity.z);
+			if (temp.magnitude > chaseSpeed) {
+				rigidbody.velocity = temp.normalized * chaseSpeed;
+			}
 		}
-		else {
-			rigidbody.velocity = Vector3.zero;
+		else if (isSuspicious) {
+			Vector3 direction = (targetPosition - transform.position).normalized;
+			direction = direction - new Vector3 (0, direction.y, 0);
+			transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
+			rigidbody.AddForce (direction * acceleration, ForceMode.Acceleration);
+			Vector3 temp = new Vector3 (rigidbody.velocity.x, 0, rigidbody.velocity.z);
+			if (temp.magnitude > investigateSpeed) {
+				rigidbody.velocity = temp.normalized * investigateSpeed;
+			}
 		}
-		if ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude > 0) {
-			GetComponent<Animator>().speed = 1;
-		}
-		else {
-			GetComponent<Animator>().speed = 0;
-		}
-		//if ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude > 0)
-		//print ((rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude);
-		//GetComponent<Animator> ().speed = (rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude;
 	}
 
 	// Update is called once per frame
 	void Update () {
 		targetAquired = false;
+		isSuspicious = false;
 		Collider[] colliders = Physics.OverlapSphere (transform.position, sightRange);
+		Collider[] sColliders = Physics.OverlapSphere (transform.position, suspicionRange);
 		foreach (Collider col in colliders) {
 			if (col.gameObject.GetComponent<PlayerManager>() != null) {
 				targetAquired = true;
 				targetPosition = col.gameObject.transform.position;
 			}
 		}
-
-//		if (targetAquired) {
-//			Vector3 direction = (targetPosition - transform.position).normalized;
-//			direction.y = 0;
-//			rigidbody.AddForce (direction * speed, ForceMode.Force);
-//			//transform.Translate (direction * speed * Time.deltaTime, Space.World);
-//			//transform.position += (direction * speed * Time.deltaTime);
-//		}
+		if (!targetAquired) {
+			foreach (Collider col in sColliders) {
+				if (col.gameObject.GetComponent<PlayerManager>() != null) {
+					isSuspicious = true;
+					targetPosition = col.gameObject.transform.position;
+				}
+			}
+		}
 	}
 }
