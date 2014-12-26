@@ -8,6 +8,7 @@ public class MobMovement : MonoBehaviour {
 	public float suspicionRange, sightRange, investigateSpeed, chaseSpeed, acceleration;
 	public float attackRange;
 	public float damageAmount;
+	public float timeBetweenAttacksInSeconds;
 	public Projectile.DamageElement damageElement;
 	public Projectile.DamageType damageType;
 	//Not adjustable
@@ -15,6 +16,7 @@ public class MobMovement : MonoBehaviour {
 	public bool targetAquired, isSuspicious, hasAttackedThisAnimation;
 	public Transform targetTransform;
 	Vector3 targetPosition;
+	public float timerBetweenAttacks;
 
 	// Use this for initialization
 	void Start () {

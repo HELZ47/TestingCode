@@ -40,11 +40,13 @@ public class BotAnimator : MonoBehaviour {
 
 			//Attacking animation
 			if (myBotManager.isAttacking &&
-			    !myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
+			    !myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack") &&
+			    myBotManager.timerBetweenAttacks >= myBotManager.timeBetweenAttacksInSeconds) {
 				myAnimator.SetBool ("isAttacking", true);
 				isAttacking = true;
 			}
-			else if (myBotManager.isAttacking == false) {
+			else if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
+				//myBotManager.isAttacking = false;
 				myAnimator.SetBool ("isAttacking", false);
 				isAttacking = false;
 			}

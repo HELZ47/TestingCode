@@ -7,10 +7,13 @@ public class MobAnimationController : MonoBehaviour {
 	float speed;
 	bool investigate, chase, isAttacking, receiveDamage, isDead;
 	Animator myAnimator;
+	MobMovement myMobMovement;
+
 
 	// Use this for initialization
 	void Awake () {
 		myAnimator = GetComponent<Animator> ();
+		myMobMovement = GetComponent<MobMovement> ();
 	}
 
 	[RPC]
@@ -47,12 +50,21 @@ public class MobAnimationController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Death") &&
-		    myAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.9f) {
-			GetComponent<HealthManager>().deathAnimationFinished = true;
-		}
-
 		if (networkView.isMine) {
+
+			if (/*myMobMovement.isAttacking &&*/ myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
+				myMobMovement.timerBetweenAttacks = 0f;
+			}
+			else {
+				myMobMovement.timerBetweenAttacks += Time.deltaTime;
+			}
+
+
+			if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Death") &&
+			    myAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.9f) {
+				GetComponent<HealthManager>().deathAnimationFinished = true;
+			}
+
 			if (GetComponent<HealthManager>().isTakingDamage) {
 				if (GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("ReceiveDamage")) {
 					GetComponent<Animator> ().SetBool ("receiveDamage", false);
@@ -75,13 +87,15 @@ public class MobAnimationController : MonoBehaviour {
 			}
 
 			if (GetComponent<MobMovement>().isAttacking &&
-			    !GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
+			    !GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Attack") && 
+			    myMobMovement.timerBetweenAttacks >= myMobMovement.timeBetweenAttacksInSeconds) {
 				GetComponent<Animator> ().SetBool ("isAttacking", true);
 				GetComponent<MobMovement>().isAttacking = false;
 				isAttacking = true;
 				networkView.RPC ("UpdateIsAttacking", RPCMode.All, true);
 			}
 			else if (GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
+				//myMobMovement.isAttacking = false;
 				GetComponent<Animator> ().SetBool ("isAttacking", false);
 				isAttacking = false;
 				networkView.RPC ("UpdateIsAttacking", RPCMode.All, false);
