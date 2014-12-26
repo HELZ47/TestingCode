@@ -70,10 +70,15 @@
      <Compile Include="Assets\Scripts\ReticleSize.cs" />
      <Compile Include="Assets\Scripts\SpawnMob.cs" />
      <Compile Include="Assets\Scripts\ThirdPersonCamera.cs" />
+     <Compile Include="Assets\Scripts\TowerAttack.cs" />
+     <Compile Include="Assets\Scripts\TowerManager.cs" />
+     <None Include="Assets\Assets Not In Use\Earthborn Troll\Shader\Alpha_Texture.shader" />
+     <None Include="Assets\Assets Not In Use\Earthborn Troll\Shader\DoubleSided-Light-Spec.shader" />
      <None Include="Assets\Standard Assets\Particles\Sources\Shaders\Particle Alpha Blend (Queue +100).shader" />
      <None Include="Assets\Standard Assets\Skyboxes\_skybox info.txt" />
-     <None Include="Assets\WomanKnightAnimationPack\Documents\Readme.txt" />
-     <None Include="Assets\Raw Mocap Data\Animations\_CompleteAnimationList.txt" />
+     <None Include="Assets\Assets Not In Use\WomanKnightAnimationPack\Documents\Readme.txt" />
+     <None Include="Assets\Assets Not In Use\Raw Mocap Data\Animations\_CompleteAnimationList.txt" />
+     <None Include="Assets\Assets Not In Use\Cartoon Soldier\Readme.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/4.6.1/UnityEngine.UI.dll</HintPath>
  </Reference>

@@ -7,6 +7,8 @@ Project("{3D2863C0-21AB-E506-96BF-7DCF6718C6D7}") = "Unity_Networking_Test", "As
 EndProject
 Project("{3D2863C0-21AB-E506-96BF-7DCF6718C6D7}") = "Unity_Networking_Test", "Assembly-UnityScript-firstpass.unityproj", "{2098A179-68AD-3C40-0606-80C567E98EA1}"
 EndProject
+Project("{3D2863C0-21AB-E506-96BF-7DCF6718C6D7}") = "Unity_Networking_Test", "Assembly-UnityScript.unityproj", "{7DFC5E75-B8BD-96BB-3551-9972DBCEE654}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,11 +27,15 @@ Global
 		{2098A179-68AD-3C40-0606-80C567E98EA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2098A179-68AD-3C40-0606-80C567E98EA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2098A179-68AD-3C40-0606-80C567E98EA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DFC5E75-B8BD-96BB-3551-9972DBCEE654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DFC5E75-B8BD-96BB-3551-9972DBCEE654}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DFC5E75-B8BD-96BB-3551-9972DBCEE654}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DFC5E75-B8BD-96BB-3551-9972DBCEE654}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-																																																																																																																											GlobalSection(MonoDevelopProperties) = preSolution
+																																																																																																																																			GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Assembly-CSharp.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1

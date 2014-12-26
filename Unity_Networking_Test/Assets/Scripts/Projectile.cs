@@ -44,10 +44,33 @@ public class Projectile : MonoBehaviour {
 		}
 	}
 
+	[RPC]
+	//RPC calls that sets the variables, this is called when the object is initialized
+	void SetDirection (Vector3 givenDirection) {
+		direction = givenDirection.normalized;
+		//Propels the projectile according to its projectile type
+		switch (projectileType) {
+		case ProjectileType.BULLET:
+			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
+			break;
+		case ProjectileType.GRENADE:
+			rigidbody.AddForce (direction * speed, ForceMode.Impulse);
+			break;
+		case ProjectileType.ORB:
+			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
+			break;
+		}
+	}
+
 	
 	//RPC Helper: Setup the initial variables for the projectile
 	public void InitVariables (Vector3 givenDirection, NetworkPlayer ownerNP) { 
 		networkView.RPC ("SetVariables", RPCMode.AllBuffered, givenDirection, ownerNP);
+	}
+
+	//RPC Helper: Setup the initial variables for the projectile
+	public void InitDirection (Vector3 givenDirection) { 
+		networkView.RPC ("SetDirection", RPCMode.AllBuffered, givenDirection);
 	}
 
 
