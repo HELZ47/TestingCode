@@ -1,8 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/SpawnMob.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BotMovement.cs">
     <Files>
-      <File FileName="Assets/Scripts/SpawnMob.cs" Line="56" Column="58" />
+      <File FileName="Assets/Scripts/SpawnMob.cs" Line="53" Column="53" />
+      <File FileName="Assets/Scripts/BotMovement.cs" Line="73" Column="66" />
+      <File FileName="Assets/Scripts/MobMovement.cs" Line="85" Column="27" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
