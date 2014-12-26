@@ -7,6 +7,7 @@ public class BotAnimator : MonoBehaviour {
 	Animator myAnimator;
 	BotManager myBotManager;
 	HealthManager myHealthManager;
+	bool isMoving, takingDamage, isDead, isAttacking;
 
 	// Use this for initialization
 	void Awake () {
@@ -14,46 +15,66 @@ public class BotAnimator : MonoBehaviour {
 		myBotManager = GetComponent<BotManager> ();
 		myHealthManager = GetComponent<HealthManager> ();
 	}
-	
+
+	[RPC]
+	void UpdateAnimation (bool isMoving, bool takingDamage, bool isDead, bool isAttacking) {
+		myAnimator.SetBool ("isMoving", isMoving);
+		myAnimator.SetBool ("takingDamage", takingDamage);
+		myAnimator.SetBool ("isDead", isDead);
+		myAnimator.SetBool ("isAttacking", isAttacking);
+	}
+
 	// Update is called once per frame
 	void Update () {
-		//Movement animations
-		Vector3 rigidSpeed = rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0);
-		if (rigidSpeed.magnitude < 0.1f) {
-			myAnimator.SetBool ("isMoving", false);
-		}
-		else {
-			myAnimator.SetBool ("isMoving", true);
-		}
-
-		//Attacking animation
-		if (myBotManager.isAttacking &&
-		    !myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
-			myAnimator.SetBool ("isAttacking", true);
-			//myBotManager.isAttacking = false;
-		}
-		else if (myBotManager.isAttacking == false) {
-			myAnimator.SetBool ("isAttacking", false);
-		}
-
-		//Death animation
-		if (myHealthManager.isDead && !myHealthManager.deathAnimationFinished) {
-			myAnimator.SetBool ("isDead", true);
-			if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Death") &&
-			    myAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.9f) {
-				myHealthManager.deathAnimationFinished = true;
-			}
-		}
-
-		//Taking DamageAnimation
-		if (myHealthManager.isTakingDamage) {
-			if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("TakingDamage")) {
-				myAnimator.SetBool ("takingDamage", false);
-				myHealthManager.isTakingDamage = false;
+		if (networkView.isMine) {
+			//Movement animations
+			Vector3 rigidSpeed = rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0);
+			if (rigidSpeed.magnitude < 0.1f) {
+				myAnimator.SetBool ("isMoving", false);
+				isMoving = false;
 			}
 			else {
-				GetComponent<Animator> ().SetBool ("takingDamage", true);
+				myAnimator.SetBool ("isMoving", true);
+				isMoving = true;
 			}
+
+			//Attacking animation
+			if (myBotManager.isAttacking &&
+			    !myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
+				myAnimator.SetBool ("isAttacking", true);
+				isAttacking = true;
+			}
+			else if (myBotManager.isAttacking == false) {
+				myAnimator.SetBool ("isAttacking", false);
+				isAttacking = false;
+			}
+
+			//Death animation
+			if (myHealthManager.isDead && !myHealthManager.deathAnimationFinished) {
+				myAnimator.SetBool ("isDead", true);
+				isDead = true;
+				if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Death") &&
+				    myAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.9f) {
+					myHealthManager.deathAnimationFinished = true;
+				}
+			}
+
+			//Taking DamageAnimation
+			if (myHealthManager.isTakingDamage) {
+				if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("TakingDamage")) {
+					myAnimator.SetBool ("takingDamage", false);
+					takingDamage = false;
+					myHealthManager.isTakingDamage = false;
+				}
+				else {
+					GetComponent<Animator> ().SetBool ("takingDamage", true);
+					takingDamage = true;
+				}
+			}
+			networkView.RPC("UpdateAnimation", RPCMode.All, isMoving, takingDamage, isDead, isAttacking);
+		}
+		else {
+
 		}
 	}
 }

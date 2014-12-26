@@ -15,6 +15,9 @@ public class BotAttack : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (!networkView.isMine) {
+			return;
+		}
 		if (myBotManager.isAttacking && myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack") &&
 		    myAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f && 
 		    myBotManager.hasAttackedThisAnimation == false) {
