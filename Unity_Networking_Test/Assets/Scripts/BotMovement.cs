@@ -62,10 +62,20 @@ public class BotMovement : MonoBehaviour {
 			myBotManager.targetAquired = false;
 			Collider[] nColliders = Physics.OverlapSphere (transform.position, myBotManager.enemyDetectionRange);
 			Collider[] vColliders = Physics.OverlapSphere (transform.position, myBotManager.VIPDetectionRange);
+			float closestEnemyDistance = 9999f;
 			foreach (Collider col in nColliders) {
 				if (col.gameObject.tag == "Mobs") {
-					myBotManager.targetAquired = true;
-					myBotManager.TargetTransform = col.gameObject.transform;
+					if (closestEnemyDistance == 9999) {
+						myBotManager.targetAquired = true;
+						myBotManager.TargetTransform = col.gameObject.transform;
+						closestEnemyDistance = Vector3.Distance (transform.position, myBotManager.TargetTransform.position);
+					}
+					else if (Vector3.Distance (transform.position, col.transform.position) < closestEnemyDistance) {
+						myBotManager.targetAquired = true;
+						myBotManager.TargetTransform = col.gameObject.transform;
+						closestEnemyDistance = Vector3.Distance (transform.position, myBotManager.TargetTransform.position);
+					}
+
 				}
 			}
 			foreach (Collider col in vColliders) {

@@ -1,18 +1,8 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/ThirdPersonCamera.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/SpawnMob.cs">
     <Files>
-      <File FileName="Assets/Scripts/BotMovement.cs" Line="78" Column="8" />
-      <File FileName="Assets/Scripts/MobMovement.cs" Line="11" Column="42" />
-      <File FileName="Assets/Scripts/HealthManager.cs" Line="10" Column="28" />
-      <File FileName="Assets/Scripts/MobAnimationController.cs" Line="98" Column="7" />
-      <File FileName="Assets/Scripts/BotManager.cs" Line="34" Column="25" />
-      <File FileName="Assets/Scripts/BotAnimator.cs" Line="48" Column="71" />
-      <File FileName="Assets/Scripts/BotAttack.cs" Line="21" Column="31" />
-      <File FileName="Assets/Scripts/Projectile.cs" Line="129" Column="7" />
-      <File FileName="Assets/Scripts/MobAttack.cs" Line="27" Column="86" />
-      <File FileName="Assets/Scripts/SpawnMob.cs" Line="38" Column="39" />
-      <File FileName="Assets/Scripts/ThirdPersonCamera.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/SpawnMob.cs" Line="56" Column="58" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
