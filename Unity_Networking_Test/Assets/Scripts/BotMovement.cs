@@ -74,7 +74,9 @@ public class BotMovement : MonoBehaviour {
 					myBotManager.VIPTransform = col.gameObject.transform;
 				}
 			}
-			if (myBotManager.targetAquired && Vector3.Distance (transform.position, myBotManager.TargetTransform.position) < myBotManager.attackingRange) {
+			if (myBotManager.targetAquired && Vector3.Distance (transform.position, myBotManager.TargetTransform.position) < myBotManager.attackingRange &&
+			    myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>() != null &&
+			    !myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>().isDead) {
 				myBotManager.isAttacking = true;
 			}
 //			networkView.RPC ("UpdateState", RPCMode.All, isAttacking, targetAquired, isSuspicious);

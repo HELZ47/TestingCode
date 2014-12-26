@@ -1,13 +1,15 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BotMovement.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BotAttack.cs">
     <Files>
-      <File FileName="Assets/Scripts/BotMovement.cs" Line="24" Column="72" />
+      <File FileName="Assets/Scripts/BotMovement.cs" Line="13" Column="52" />
       <File FileName="Assets/Scripts/MobMovement.cs" Line="86" Column="3" />
-      <File FileName="Assets/Scripts/HealthManager.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/MobAnimationController.cs" Line="98" Column="18" />
-      <File FileName="Assets/Scripts/BotManager.cs" Line="12" Column="50" />
-      <File FileName="Assets/Scripts/BotAnimator.cs" Line="29" Column="37" />
+      <File FileName="Assets/Scripts/HealthManager.cs" Line="10" Column="28" />
+      <File FileName="Assets/Scripts/MobAnimationController.cs" Line="69" Column="5" />
+      <File FileName="Assets/Scripts/BotManager.cs" Line="15" Column="76" />
+      <File FileName="Assets/Scripts/BotAnimator.cs" Line="74" Column="93" />
+      <File FileName="Assets/Scripts/BotAttack.cs" Line="19" Column="11" />
+      <File FileName="Assets/Scripts/Projectile.cs" Line="129" Column="7" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

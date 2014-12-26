@@ -59,6 +59,7 @@
      <Compile Include="Assets\Scripts\Launch_Projectile.cs" />
      <Compile Include="Assets\Scripts\MainMenu.cs" />
      <Compile Include="Assets\Scripts\MobAnimationController.cs" />
+     <Compile Include="Assets\Scripts\MobAttack.cs" />
      <Compile Include="Assets\Scripts\MobMovement.cs" />
      <Compile Include="Assets\Scripts\MouseLook.cs" />
      <Compile Include="Assets\Scripts\MovementController.cs" />

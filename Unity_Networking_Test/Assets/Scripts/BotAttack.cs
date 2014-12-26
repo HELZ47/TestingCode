@@ -23,7 +23,9 @@ public class BotAttack : MonoBehaviour {
 		    myBotManager.hasAttackedThisAnimation == false) {
 			myBotManager.isAttacking = false;
 			if (myBotManager.TargetTransform != null && 
-			    Vector3.Distance(myBotManager.TargetTransform.position, transform.position) < myBotManager.attackingRange) {
+			    Vector3.Distance(myBotManager.TargetTransform.position, transform.position) < myBotManager.attackingRange &&
+			    myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>() != null &&
+			    !myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>().isDead) {
 				myBotManager.hasAttackedThisAnimation = true;
 				myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>().ReceiveDamage (myBotManager.damageAmount, myBotManager.damageType, myBotManager.damageElement);
 			}

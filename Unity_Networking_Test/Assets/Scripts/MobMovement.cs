@@ -4,10 +4,16 @@ using System.Collections;
 public class MobMovement : MonoBehaviour {
 
 	//Fields
+	//Adjustable
 	public float suspicionRange, sightRange, investigateSpeed, chaseSpeed, acceleration;
 	public float attackRange;
+	public float damageAmount;
+	public Projectile.DamageElement damageElement;
+	public Projectile.DamageType damageType;
+	//Not adjustable
 	public bool isAttacking;
-	public bool targetAquired, isSuspicious;
+	public bool targetAquired, isSuspicious, hasAttackedThisAnimation;
+	public Transform targetTransform;
 	Vector3 targetPosition;
 
 	// Use this for initialization
@@ -61,10 +67,22 @@ public class MobMovement : MonoBehaviour {
 			isSuspicious = false;
 			Collider[] colliders = Physics.OverlapSphere (transform.position, sightRange);
 			Collider[] sColliders = Physics.OverlapSphere (transform.position, suspicionRange);
+			float shortestDistanceTarget = 10000f;
 			foreach (Collider col in colliders) {
-				if (col.gameObject.GetComponent<PlayerManager>() != null) {
-					targetAquired = true;
-					targetPosition = col.gameObject.transform.position;
+				if ((col.gameObject.GetComponent<PlayerManager>() != null || col.gameObject.GetComponent<HealthManager>() != null) &&
+				    col.tag != "Mobs") {
+					if (shortestDistanceTarget == 10000f) {
+						targetAquired = true;
+						targetPosition = col.gameObject.transform.position;
+						targetTransform = col.gameObject.transform;
+						shortestDistanceTarget = Vector3.Distance (transform.position, col.gameObject.transform.position);
+					}
+					else if (Vector3.Distance (transform.position, col.gameObject.transform.position) < shortestDistanceTarget) {
+						targetAquired = true;
+						targetPosition = col.gameObject.transform.position;
+						targetTransform = col.gameObject.transform;
+						shortestDistanceTarget = Vector3.Distance (transform.position, col.gameObject.transform.position);
+					}
 				}
 			}
 			if (!targetAquired) {
@@ -75,7 +93,9 @@ public class MobMovement : MonoBehaviour {
 					}
 				}
 			}
-			if (targetAquired && Vector3.Distance (transform.position, targetPosition) < attackRange) {
+			if (targetAquired && Vector3.Distance (transform.position, targetPosition) < attackRange && 
+			    targetTransform.gameObject.GetComponent<HealthManager>() != null &&
+			    !targetTransform.gameObject.GetComponent<HealthManager>().isDead) {
 				isAttacking = true;
 			}
 			networkView.RPC ("UpdateState", RPCMode.All, isAttacking, targetAquired, isSuspicious);
