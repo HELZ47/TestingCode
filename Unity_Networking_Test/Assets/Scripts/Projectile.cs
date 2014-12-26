@@ -116,7 +116,7 @@ public class Projectile : MonoBehaviour {
 				if (hitInfo.collider != this.collider &&
 				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
 				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-				 	 hitInfo.collider.tag == "Mobs") &&
+				 	 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
 					rigidbody.isKinematic = true;
@@ -125,7 +125,9 @@ public class Projectile : MonoBehaviour {
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
 					GetComponent<MeshRenderer>().enabled = false;
-					damageReceivers.Add (hitInfo.gameObject);
+					if (hitInfo.collider.tag != "Bots") {
+						damageReceivers.Add (hitInfo.gameObject);
+					}
 				}
 			}
 			if (!isHit) {
@@ -151,7 +153,7 @@ public class Projectile : MonoBehaviour {
 				if (hitInfo.collider != this.collider &&
 				    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
 				 	(hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-				 	 hitInfo.collider.tag == "Mobs") &&
+				 	 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
 					rigidbody.isKinematic = true;
@@ -168,7 +170,7 @@ public class Projectile : MonoBehaviour {
 					if (hitInfo.collider != this.collider &&
 					    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
 					    (hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-					 	 hitInfo.collider.tag == "Mobs") &&
+					 	 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
 					    hitInfo.collider.tag != "Projectiles") {
 						damageReceivers.Add (hitInfo.gameObject);
 					}
@@ -206,7 +208,7 @@ public class Projectile : MonoBehaviour {
 				if (hitInfo.collider != this.collider &&
 				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
 				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-				 	 hitInfo.collider.tag == "Mobs") &&
+				 	 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
 				    !isHit && hitInfo.collider.tag != "Projectiles") {
 					isHit = true;
 					rigidbody.isKinematic = true;
@@ -223,7 +225,7 @@ public class Projectile : MonoBehaviour {
 					if (hitInfo.collider != this.collider &&
 					    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
 					    (hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-					 hitInfo.collider.tag == "Mobs") &&
+						 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
 					    hitInfo.collider.tag != "Projectiles") {
 						damageReceivers.Add (hitInfo.gameObject);
 					}

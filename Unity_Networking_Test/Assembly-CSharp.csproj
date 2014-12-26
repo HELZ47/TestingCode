@@ -47,6 +47,10 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\AnimationController.cs" />
+     <Compile Include="Assets\Scripts\BotAnimator.cs" />
+     <Compile Include="Assets\Scripts\BotAttack.cs" />
+     <Compile Include="Assets\Scripts\BotManager.cs" />
+     <Compile Include="Assets\Scripts\BotMovement.cs" />
      <Compile Include="Assets\Scripts\CameraEnabler.cs" />
      <Compile Include="Assets\Scripts\ChangeColor.cs" />
      <Compile Include="Assets\Scripts\FirstPersonKeys.cs" />
