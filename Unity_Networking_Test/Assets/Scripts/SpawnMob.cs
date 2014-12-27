@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class SpawnMob : MonoBehaviour {
 
 	//Fields
-	public enum SpawnType { ZOMBIE, ROBOT, ROBOT_RANGED, TOWER };
+	public enum SpawnType { ZOMBIE, ROBOT, ROBOT_RANGED, TOWER, TEST };
 	public enum SpawnNumber { GLOBAL, LOCAL, SINGLE };
 	public SpawnType spawnType;
 	public SpawnNumber spawnNumber;
@@ -70,6 +70,9 @@ public class SpawnMob : MonoBehaviour {
 					case SpawnType.ROBOT_RANGED:
 						Network.Instantiate (Resources.Load ("Prefabs/Robot_Ranged"), spawnPosition, new Quaternion(), 0);
 						break;
+					case SpawnType.TEST:
+						Network.Instantiate (Resources.Load ("Prefabs/Dummy"), spawnPosition, new Quaternion(), 0);
+						break;
 					}
 
 				}
@@ -110,6 +113,9 @@ public class SpawnMob : MonoBehaviour {
 						break;
 					case SpawnType.ROBOT_RANGED:
 						Network.Instantiate (Resources.Load ("Prefabs/Robot_Ranged"), spawnPosition, new Quaternion(), 0);
+						break;
+					case SpawnType.TEST:
+						Network.Instantiate (Resources.Load ("Prefabs/Dummy"), spawnPosition, new Quaternion(), 0);
 						break;
 					}
 					
