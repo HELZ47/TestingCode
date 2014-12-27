@@ -27,12 +27,15 @@ public class BotMovement : MonoBehaviour {
 				return;
 			}
 			if (myBotManager.isAttacking && myBotManager.TargetTransform != null) {
+				rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
 				Vector3 direction = (myBotManager.TargetTransform.position - transform.position).normalized;
 				direction.y = 0f;
 				transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
 				return;
 			}
-			if (myBotManager.targetAquired && myBotManager.TargetTransform != null) {
+			else if (myBotManager.targetAquired && myBotManager.TargetTransform != null &&
+			         myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>() != null &&
+			         !myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>().isDead) {
 				Vector3 direction = (myBotManager.TargetTransform.position - transform.position).normalized;
 				direction.y = 0f;
 				transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
@@ -52,6 +55,9 @@ public class BotMovement : MonoBehaviour {
 				if (temp.magnitude > myBotManager.movementSpeed) {
 					rigidbody.velocity = temp.normalized * myBotManager.movementSpeed;
 				}
+			}
+			else {
+				rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
 			}
 		}
 		else {

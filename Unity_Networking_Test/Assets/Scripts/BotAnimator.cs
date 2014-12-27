@@ -29,7 +29,7 @@ public class BotAnimator : MonoBehaviour {
 		if (networkView.isMine) {
 			//Movement animations
 			Vector3 rigidSpeed = rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0);
-			if (rigidSpeed.magnitude < 0.1f) {
+			if (rigidSpeed.magnitude < 0.25f) {
 				myAnimator.SetBool ("isMoving", false);
 				isMoving = false;
 			}

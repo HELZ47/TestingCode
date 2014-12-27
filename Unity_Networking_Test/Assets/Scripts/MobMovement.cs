@@ -33,10 +33,13 @@ public class MobMovement : MonoBehaviour {
 	//Rotation
 	void FixedUpdate () {
 		if (networkView.isMine) {
-			if (GetComponent<HealthManager>().isDead || isAttacking) {
+			if (GetComponent<HealthManager>().isDead) {
 				return;
 			}
-			if (targetAquired) {
+			if (isAttacking) {
+				rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
+			}
+			else if (targetAquired) {
 				Vector3 direction = (targetPosition - transform.position).normalized;
 				direction = direction - new Vector3 (0, direction.y, 0);
 				transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
@@ -55,6 +58,9 @@ public class MobMovement : MonoBehaviour {
 				if (temp.magnitude > investigateSpeed) {
 					rigidbody.velocity = temp.normalized * investigateSpeed;
 				}
+			}
+			else {
+				rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
 			}
 		}
 		else {

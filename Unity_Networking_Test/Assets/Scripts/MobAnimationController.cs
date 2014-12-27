@@ -104,7 +104,7 @@ public class MobAnimationController : MonoBehaviour {
 			Animator animator = GetComponent<Animator> ();
 			MobMovement mobMovement = GetComponent<MobMovement> ();
 			speed = (rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0)).magnitude;
-			if (mobMovement.targetAquired) {
+			if (mobMovement.targetAquired && speed > 0.25f) {
 				animator.SetBool ("investigate", false);
 				animator.SetBool ("chase", true);
 				investigate = false;
@@ -112,7 +112,7 @@ public class MobAnimationController : MonoBehaviour {
 				networkView.RPC ("UpdateInvestigate", RPCMode.All, false);
 				networkView.RPC ("UpdateChase", RPCMode.All, true);
 			}
-			else if (mobMovement.isSuspicious) {
+			else if (mobMovement.isSuspicious && speed > 0.25f) {
 				animator.SetBool ("investigate", true);
 				animator.SetBool ("chase", false);
 				investigate = true;
