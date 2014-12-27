@@ -65,20 +65,20 @@ public class MobAnimationController : MonoBehaviour {
 				GetComponent<HealthManager>().deathAnimationFinished = true;
 			}
 
-			if (GetComponent<HealthManager>().isTakingDamage) {
-				if (GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("ReceiveDamage")) {
-					GetComponent<Animator> ().SetBool ("receiveDamage", false);
-					GetComponent<HealthManager>().isTakingDamage = false;
-					receiveDamage = false;
-					networkView.RPC ("UpdateReceiveDamage", RPCMode.All, false);
-				}
-				else {
-					GetComponent<Animator>().speed = 1;
-					GetComponent<Animator> ().SetBool ("receiveDamage", true);
-					receiveDamage = true;
-					networkView.RPC ("UpdateReceiveDamage", RPCMode.All, true);
-				}
-			}
+//			if (GetComponent<HealthManager>().isTakingDamage) {
+//				if (GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("ReceiveDamage")) {
+//					GetComponent<Animator> ().SetBool ("receiveDamage", false);
+//					GetComponent<HealthManager>().isTakingDamage = false;
+//					receiveDamage = false;
+//					networkView.RPC ("UpdateReceiveDamage", RPCMode.All, false);
+//				}
+//				else {
+//					GetComponent<Animator>().speed = 1;
+//					GetComponent<Animator> ().SetBool ("receiveDamage", true);
+//					receiveDamage = true;
+//					networkView.RPC ("UpdateReceiveDamage", RPCMode.All, true);
+//				}
+//			}
 
 			if (GetComponent<HealthManager>().isDead) {
 				GetComponent<Animator> ().SetBool ("isDead", true);

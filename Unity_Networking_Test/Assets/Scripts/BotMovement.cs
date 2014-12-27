@@ -23,7 +23,13 @@ public class BotMovement : MonoBehaviour {
 	//Rotation
 	void FixedUpdate () {
 		if (networkView.isMine) {
-			if (GetComponent<HealthManager>().isDead || myBotManager.isAttacking || myHealthManager.isTakingDamage) {
+			if (GetComponent<HealthManager>().isDead) {
+				return;
+			}
+			if (myBotManager.isAttacking) {
+				Vector3 direction = (myBotManager.TargetTransform.position - transform.position).normalized;
+				direction.y = 0f;
+				transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
 				return;
 			}
 			if (myBotManager.targetAquired && myBotManager.TargetTransform != null) {

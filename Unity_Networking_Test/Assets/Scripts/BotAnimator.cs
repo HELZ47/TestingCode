@@ -62,17 +62,18 @@ public class BotAnimator : MonoBehaviour {
 			}
 
 			//Taking DamageAnimation
-			if (myHealthManager.isTakingDamage) {
-				if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("TakingDamage")) {
-					myAnimator.SetBool ("takingDamage", false);
-					takingDamage = false;
-					myHealthManager.isTakingDamage = false;
-				}
-				else {
-					GetComponent<Animator> ().SetBool ("takingDamage", true);
-					takingDamage = true;
-				}
-			}
+//			if (myHealthManager.isTakingDamage) {
+//				if (myAnimator.GetCurrentAnimatorStateInfo(0).IsName("TakingDamage")) {
+//					myAnimator.SetBool ("takingDamage", false);
+//					takingDamage = false;
+//					myHealthManager.isTakingDamage = false;
+//				}
+//				else {
+//					GetComponent<Animator> ().SetBool ("takingDamage", true);
+//					takingDamage = true;
+//				}
+//			}
+			takingDamage = false;
 			networkView.RPC("UpdateAnimation", RPCMode.All, isMoving, takingDamage, isDead, isAttacking);
 		}
 		else {
