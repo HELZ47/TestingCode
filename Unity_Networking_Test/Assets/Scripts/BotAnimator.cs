@@ -8,12 +8,15 @@ public class BotAnimator : MonoBehaviour {
 	BotManager myBotManager;
 	HealthManager myHealthManager;
 	bool isMoving, takingDamage, isDead, isAttacking;
+	NavMeshAgent myNavMeshAgent;
+	bool rbEnabled;
 
 	// Use this for initialization
 	void Awake () {
 		myAnimator = GetComponent<Animator> ();
 		myBotManager = GetComponent<BotManager> ();
 		myHealthManager = GetComponent<HealthManager> ();
+		myNavMeshAgent = GetComponent<NavMeshAgent> ();
 	}
 
 	[RPC]
@@ -27,15 +30,29 @@ public class BotAnimator : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (networkView.isMine) {
+			rbEnabled = !rigidbody.isKinematic;
+
 			//Movement animations
-			Vector3 rigidSpeed = rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0);
-			if (rigidSpeed.magnitude < 0.25f) {
-				myAnimator.SetBool ("isMoving", false);
-				isMoving = false;
+			if (rbEnabled) {
+				Vector3 rigidSpeed = rigidbody.velocity - new Vector3 (0, rigidbody.velocity.y, 0);
+				if (rigidSpeed.magnitude < 0.25f) {
+					myAnimator.SetBool ("isMoving", false);
+					isMoving = false;
+				}
+				else {
+					myAnimator.SetBool ("isMoving", true);
+					isMoving = true;
+				}
 			}
 			else {
-				myAnimator.SetBool ("isMoving", true);
-				isMoving = true;
+				if (myNavMeshAgent.velocity.magnitude < 0.25f) {
+					myAnimator.SetBool ("isMoving", false);
+					isMoving = false;
+				}
+				else {
+					myAnimator.SetBool ("isMoving", true);
+					isMoving = true;
+				}
 			}
 
 			//Attacking animation

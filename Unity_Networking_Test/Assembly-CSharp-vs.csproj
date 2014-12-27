@@ -51,6 +51,8 @@
      <Compile Include="Assets\Scripts\BotAttack.cs" />
      <Compile Include="Assets\Scripts\BotManager.cs" />
      <Compile Include="Assets\Scripts\BotMovement.cs" />
+     <Compile Include="Assets\Scripts\BotNavMeshMovement.cs" />
+     <Compile Include="Assets\Scripts\Bot_NavMesh_Movement.cs" />
      <Compile Include="Assets\Scripts\CameraEnabler.cs" />
      <Compile Include="Assets\Scripts\ChangeColor.cs" />
      <Compile Include="Assets\Scripts\FirstPersonKeys.cs" />
@@ -72,6 +74,7 @@
      <Compile Include="Assets\Scripts\ThirdPersonCamera.cs" />
      <Compile Include="Assets\Scripts\TowerAttack.cs" />
      <Compile Include="Assets\Scripts\TowerManager.cs" />
+     <Compile Include="Assets\Scripts\Waypoints.cs" />
      <None Include="Assets\Assets Not In Use\Earthborn Troll\Shader\Alpha_Texture.shader" />
      <None Include="Assets\Assets Not In Use\Earthborn Troll\Shader\DoubleSided-Light-Spec.shader" />
      <None Include="Assets\Standard Assets\Particles\Sources\Shaders\Particle Alpha Blend (Queue +100).shader" />
