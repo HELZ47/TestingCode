@@ -4,6 +4,7 @@ using System.Collections;
 public class BotManager : MonoBehaviour {
 
 	//Fields
+
 	//Adjustable
 	public enum BotType { GENERAL_BODY_GUARD, SPECIFIC_BODY_GUARD, PATROL };
 	public BotType botType;
@@ -12,6 +13,8 @@ public class BotManager : MonoBehaviour {
 	public Projectile.DamageElement damageElement;
 	public Projectile.DamageType damageType;
 	public float enemyDetectionRange, VIPDetectionRange, movementSpeed, acceleration, stoppingRange, attackingRange;
+	public GameObject projectileStartMarker;
+
 	//Not Adjustable
 	public bool targetAquired, VIPFound, isAttacking, hasAttackedThisAnimation;
 	public Transform VIPTransform;

@@ -8,7 +8,7 @@ public class Projectile : MonoBehaviour {
 	//Fields
 	public enum ProjectileType { BULLET, GRENADE, ORB }
 	public enum DamageElement { PHYSICAL, FIRE, WATER, ICE, ELECTRIC };
-	public enum DamageType { DIRECT, SPLASH }
+	public enum DamageType { DIRECT, SPLASH, MELEE }
 	public enum TeamNumber { TEAM_ONE, TEAM_TWO }
 	//Adjustable
 	public ProjectileType projectileType;
@@ -137,7 +137,9 @@ public class Projectile : MonoBehaviour {
 		case ProjectileType.BULLET:
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (!isHit && hitInfo.collider != this.collider &&
-				    hitInfo.tag != "Projectiles") {
+				    hitInfo.tag != "Projectiles" &&
+				    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+				     (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
 					isHit = true;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;

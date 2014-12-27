@@ -26,7 +26,7 @@ public class BotMovement : MonoBehaviour {
 			if (GetComponent<HealthManager>().isDead) {
 				return;
 			}
-			if (myBotManager.isAttacking) {
+			if (myBotManager.isAttacking && myBotManager.TargetTransform != null) {
 				Vector3 direction = (myBotManager.TargetTransform.position - transform.position).normalized;
 				direction.y = 0f;
 				transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
