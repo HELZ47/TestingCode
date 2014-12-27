@@ -107,7 +107,7 @@ public class MovementController : MonoBehaviour {
 				CapsuleCollider capCol = GetComponent<CapsuleCollider>();
 				BoxCollider boxCol = GetComponent<BoxCollider>();
 				foreach (Collider col in Physics.OverlapSphere (transform.position, capCol.height/2f)) {
-					if (col.tag == "Ground" && boxCol.bounds.Intersects (col.bounds)) {
+					if ((col.tag == "Ground" || col.tag == "Environment") && boxCol.bounds.Intersects (col.bounds)) {
 						playerManager.movementState = PlayerManager.MovementState.IDLE;
 					}
 				}

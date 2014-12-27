@@ -145,8 +145,15 @@ public class Launch_Projectile : MonoBehaviour {
 	//RPC call that creates the projectile on the server side
 	public void CreateProjectile (string source, Vector3 position, Quaternion rotation, Vector3 direction, NetworkPlayer np) {
 		if (Network.isServer) {
+			int teamNum = 99;
+			if (tag == "Team 1") {
+				teamNum = 1;
+			}
+			else if (tag == "Team 2") {
+				teamNum = 2;
+			}
 			GameObject projectile = Network.Instantiate (Resources.Load(source), position, rotation, 0) as GameObject;
-			projectile.GetComponent<Projectile>().InitVariables (direction.normalized, np);
+			projectile.GetComponent<Projectile>().InitVariables (direction.normalized, teamNum);
 		}
 	}
 }

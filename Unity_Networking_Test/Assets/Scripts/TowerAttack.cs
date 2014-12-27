@@ -15,7 +15,14 @@ public class TowerAttack : MonoBehaviour {
 	public void CreateProjectile (string source, Vector3 position, Quaternion rotation, Vector3 direction) {
 		if (Network.isServer) {
 			GameObject projectile = Network.Instantiate (Resources.Load(source), position, rotation, 0) as GameObject;
-			projectile.GetComponent<Projectile>().InitDirection (direction.normalized);
+			int teamNum = 99;
+			if (tag == "Team 1") {
+				teamNum = 1;
+			}
+			else if (tag == "Team 2") {
+				teamNum = 2;
+			}
+			projectile.GetComponent<Projectile>().InitVariables (direction.normalized, teamNum);
 		}
 	}
 
@@ -26,6 +33,9 @@ public class TowerAttack : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (!networkView.isMine) {
+			return;
+		}
 		Collider[] potentialTargets = Physics.OverlapSphere (transform.position, myTowerManager.rangeOfAttack);
 		float shortestDistance = 9999f;
 		foreach (Collider col in potentialTargets) {
@@ -47,7 +57,7 @@ public class TowerAttack : MonoBehaviour {
 			timerBetweenShots = 0f;
 			direction = (myTowerManager.targetTransform.position - myTowerManager.projectileStartPosition).normalized;
 			//direction = Vector3.right;
-			CreateProjectile ("Prefabs/Lightning_Orb", myTowerManager.projectileStartPosition, new Quaternion(), direction);
+			CreateProjectile ("Prefabs/Lightning_Orb", myTowerManager.projectileStartPosition + direction*2f, new Quaternion(), direction);
 		}
 		else {
 			timerBetweenShots += Time.deltaTime;

@@ -32,11 +32,10 @@ public class HealthManager : MonoBehaviour {
 
 
 		if (Network.isServer) {
-			if (isDead && deathAnimationFinished) {//GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Death") &&
-			    //GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.9f) {
+			if ((isDead && GetComponent<Animator>() == null) ||
+			    (isDead && GetComponent<Animator>() != null && deathAnimationFinished)) {
 				Network.RemoveRPCs (networkView.viewID);
 				Network.Destroy (gameObject);
-				//networkView.RPC ("DeathForObject", RPCMode.AllBuffered); //Not fully working
 			}
 		}
 	}

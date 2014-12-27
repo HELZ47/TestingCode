@@ -9,13 +9,17 @@ public class Projectile : MonoBehaviour {
 	public enum ProjectileType { BULLET, GRENADE, ORB }
 	public enum DamageElement { PHYSICAL, FIRE, WATER, ICE, ELECTRIC };
 	public enum DamageType { DIRECT, SPLASH }
+	public enum TeamNumber { TEAM_ONE, TEAM_TWO }
+	//Adjustable
 	public ProjectileType projectileType;
-	public ParticleSystem projectParticles, hitParticles;
-	public float lifeTime, speed;
 	public DamageElement damageElement;
 	public DamageType damageType;
+	public float lifeTime, speed;
 	public float damageAmount;
 	public float splashDamageRange;
+	public ParticleSystem projectParticles, hitParticles;
+	//Not Adjustable
+	TeamNumber teamNumber;
 	List<GameObject> damageReceivers;
 	NetworkPlayer owner;
 	int RPCGroup;
@@ -27,9 +31,9 @@ public class Projectile : MonoBehaviour {
 	#region Initialization
 	[RPC]
 	//RPC calls that sets the variables, this is called when the object is initialized
-	void SetVariables (Vector3 givenDirection, NetworkPlayer ownerNP) {
+	void SetVariables (Vector3 givenDirection, int teamNum) {
 		direction = givenDirection.normalized;
-		owner = ownerNP;
+		teamNumber = (teamNum == 1) ? TeamNumber.TEAM_ONE : TeamNumber.TEAM_TWO;
 		//Propels the projectile according to its projectile type
 		switch (projectileType) {
 		case ProjectileType.BULLET:
@@ -44,34 +48,34 @@ public class Projectile : MonoBehaviour {
 		}
 	}
 
-	[RPC]
-	//RPC calls that sets the variables, this is called when the object is initialized
-	void SetDirection (Vector3 givenDirection) {
-		direction = givenDirection.normalized;
-		//Propels the projectile according to its projectile type
-		switch (projectileType) {
-		case ProjectileType.BULLET:
-			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
-			break;
-		case ProjectileType.GRENADE:
-			rigidbody.AddForce (direction * speed, ForceMode.Impulse);
-			break;
-		case ProjectileType.ORB:
-			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
-			break;
-		}
-	}
+//	[RPC]
+//	//RPC calls that sets the variables, this is called when the object is initialized
+//	void SetDirection (Vector3 givenDirection) {
+//		direction = givenDirection.normalized;
+//		//Propels the projectile according to its projectile type
+//		switch (projectileType) {
+//		case ProjectileType.BULLET:
+//			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
+//			break;
+//		case ProjectileType.GRENADE:
+//			rigidbody.AddForce (direction * speed, ForceMode.Impulse);
+//			break;
+//		case ProjectileType.ORB:
+//			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
+//			break;
+//		}
+//	}
 
 	
 	//RPC Helper: Setup the initial variables for the projectile
-	public void InitVariables (Vector3 givenDirection, NetworkPlayer ownerNP) { 
-		networkView.RPC ("SetVariables", RPCMode.AllBuffered, givenDirection, ownerNP);
+	public void InitVariables (Vector3 givenDirection, int teamNum) { 
+		networkView.RPC ("SetVariables", RPCMode.AllBuffered, givenDirection, teamNum);
 	}
 
-	//RPC Helper: Setup the initial variables for the projectile
-	public void InitDirection (Vector3 givenDirection) { 
-		networkView.RPC ("SetDirection", RPCMode.AllBuffered, givenDirection);
-	}
+//	//RPC Helper: Setup the initial variables for the projectile
+//	public void InitDirection (Vector3 givenDirection) { 
+//		networkView.RPC ("SetDirection", RPCMode.AllBuffered, givenDirection);
+//	}
 
 
 	//Initialized its own vatiables locally when instantiated
@@ -82,11 +86,6 @@ public class Projectile : MonoBehaviour {
 		timeAlive = 0f; //Initialize the time alive
 		damageReceivers = new List<GameObject> ();
 		damageDealt = false;
-	}
-
-
-	// Use this for initialization
-	void Start () {
 	}
 	#endregion
 
@@ -108,6 +107,7 @@ public class Projectile : MonoBehaviour {
 			}
 			damageDealt = true;
 		}
+		//Destroy the projectile after it has it and its hit animation has finished
 		if (isHit == true && !hitParticles.isPlaying) {
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
@@ -136,11 +136,8 @@ public class Projectile : MonoBehaviour {
 		switch (projectileType) {
 		case ProjectileType.BULLET:
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
-				if (hitInfo.collider != this.collider &&
-				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
-				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-				 	 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
-				    !isHit && hitInfo.collider.tag != "Projectiles") {
+				if (!isHit && hitInfo.collider != this.collider &&
+				    hitInfo.tag != "Projectiles") {
 					isHit = true;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
@@ -148,7 +145,8 @@ public class Projectile : MonoBehaviour {
 					hitParticles.Play ();
 					GetComponent<Collider>().isTrigger = true;
 					GetComponent<MeshRenderer>().enabled = false;
-					if (hitInfo.collider.tag != "Bots") {
+					if ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+					    (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2")) {
 						damageReceivers.Add (hitInfo.gameObject);
 					}
 				}
@@ -173,11 +171,12 @@ public class Projectile : MonoBehaviour {
 			break;
 		case ProjectileType.GRENADE:
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
-				if (hitInfo.collider != this.collider &&
-				    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
-				 	(hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-				 	 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
-				    !isHit && hitInfo.collider.tag != "Projectiles") {
+				if (!isHit && hitInfo.collider != this.collider &&
+				    hitInfo.collider.tag != "Projectiles" &&
+				    hitInfo.collider.tag != "Ground" &&
+				    hitInfo.collider.tag != "Environment" &&
+				    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+				 	 (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
 					isHit = true;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
@@ -190,11 +189,9 @@ public class Projectile : MonoBehaviour {
 			if (isHit) {
 				damageReceivers.Clear();
 				foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, splashDamageRange)) {
-					if (hitInfo.collider != this.collider &&
-					    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
-					    (hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-					 	 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
-					    hitInfo.collider.tag != "Projectiles") {
+					if (hitInfo.gameObject.GetComponent<HealthManager>() != null &&
+					    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+					     (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
 						damageReceivers.Add (hitInfo.gameObject);
 					}
 				}
@@ -228,11 +225,8 @@ public class Projectile : MonoBehaviour {
 			break;
 		case ProjectileType.ORB:
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
-				if (hitInfo.collider != this.collider &&
-				    (!hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() ||
-				 	 hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-				 	 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
-				    !isHit && hitInfo.collider.tag != "Projectiles") {
+				if (!isHit && hitInfo.collider != this.collider &&
+				    hitInfo.tag != "Projectiles") {
 					isHit = true;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
@@ -245,11 +239,9 @@ public class Projectile : MonoBehaviour {
 			if (isHit) {
 				damageReceivers.Clear();
 				foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, splashDamageRange)) {
-					if (hitInfo.collider != this.collider &&
-					    hitInfo.collider.gameObject.GetComponentInParent<NetworkView>() &&
-					    (hitInfo.collider.gameObject.GetComponentInParent<NetworkView>().owner != owner ||
-						 hitInfo.collider.tag == "Mobs" || hitInfo.collider.tag == "Bots") &&
-					    hitInfo.collider.tag != "Projectiles") {
+					if (hitInfo.gameObject.GetComponent<HealthManager>() != null &&
+					    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+					 	 (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
 						damageReceivers.Add (hitInfo.gameObject);
 					}
 				}
