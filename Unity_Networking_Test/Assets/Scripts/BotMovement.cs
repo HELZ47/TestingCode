@@ -8,6 +8,8 @@ public class BotMovement : MonoBehaviour {
 	HealthManager myHealthManager;
 	NavMeshAgent myNavMeshAgent;
 	bool rbEnabled;
+	Vector3 currentWayPoint;
+	int currentWayPointIndex;
 	
 	// Use this for initialization
 	void Awake () {
@@ -63,35 +65,51 @@ public class BotMovement : MonoBehaviour {
 					rigidbody.velocity = temp.normalized * myBotManager.movementSpeed;
 				}
 			}
-			//If there is not target within detection range, follow VIP using navMesh
-			else if (myBotManager.VIPFound && myBotManager.VIPTransform != null && 
-			         Vector3.Distance(transform.position, myBotManager.VIPTransform.position) > myBotManager.stoppingRange) {
-				Vector3 direction = (myBotManager.VIPTransform.position - transform.position).normalized;
-				direction.y = 0f;
-				transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
-//				rigidbody.AddForce (direction * myBotManager.acceleration, ForceMode.Acceleration);
-//				Vector3 temp = new Vector3 (rigidbody.velocity.x, 0, rigidbody.velocity.z);
-//				if (temp.magnitude > myBotManager.movementSpeed) {
-//					rigidbody.velocity = temp.normalized * myBotManager.movementSpeed;
-//				}
-				if (rbEnabled) {
-					rigidbody.isKinematic = true;
-				}
-				myNavMeshAgent.SetDestination (myBotManager.VIPTransform.position);
-				myNavMeshAgent.stoppingDistance = myBotManager.stoppingRange;
-			}
-			//If there is no target and no VIP, stop the bot
 			else {
-				if (rbEnabled) {
-					rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
+				if (myBotManager.botType == BotManager.BotType.GENERAL_BODY_GUARD) {
+					//If there is not target within detection range, follow VIP using navMesh
+					if (myBotManager.VIPFound && myBotManager.VIPTransform != null && 
+					         Vector3.Distance(transform.position, myBotManager.VIPTransform.position) > myBotManager.stoppingRange) {
+						Vector3 direction = (myBotManager.VIPTransform.position - transform.position).normalized;
+						direction.y = 0f;
+						transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
+		//				rigidbody.AddForce (direction * myBotManager.acceleration, ForceMode.Acceleration);
+		//				Vector3 temp = new Vector3 (rigidbody.velocity.x, 0, rigidbody.velocity.z);
+		//				if (temp.magnitude > myBotManager.movementSpeed) {
+		//					rigidbody.velocity = temp.normalized * myBotManager.movementSpeed;
+		//				}
+						if (rbEnabled) {
+							rigidbody.isKinematic = true;
+						}
+						myNavMeshAgent.SetDestination (myBotManager.VIPTransform.position);
+						myNavMeshAgent.stoppingDistance = myBotManager.stoppingRange;
+					}
+					//If there is no target and no VIP, stop the bot
+					else {
+						if (rbEnabled) {
+							rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
+						}
+						else {
+							myNavMeshAgent.Stop();
+						}
+					}
 				}
-				else {
-					myNavMeshAgent.Stop();
+				else if (myBotManager.botType == BotManager.BotType.PATROL) {
+					if (rbEnabled) {
+						rigidbody.isKinematic = true;
+					}
+					if (Vector3.Distance(myBotManager.givenPath.waypoints[currentWayPointIndex], transform.position) < 2f) {
+						currentWayPointIndex++;
+						if (currentWayPointIndex > myBotManager.givenPath.waypoints.Count - 1) {
+							currentWayPointIndex = 0;
+						}
+					}
+					myNavMeshAgent.SetDestination (myBotManager.givenPath.waypoints [currentWayPointIndex]);
 				}
 			}
 		}
 		else {
-			
+
 		}
 	}
 	

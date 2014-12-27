@@ -22,7 +22,7 @@ public class ThirdPersonCamera : MonoBehaviour {
 
 
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () { //maybe the fixed update will fix the framerate/sensitivity issue
 		if (!GetComponentInParent<NetworkView>().isMine) {
 			//enabled = false;
 			return;

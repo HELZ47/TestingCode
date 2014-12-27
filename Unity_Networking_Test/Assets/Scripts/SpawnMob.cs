@@ -5,11 +5,12 @@ using System.Collections.Generic;
 public class SpawnMob : MonoBehaviour {
 
 	//Fields
-	public enum SpawnType { ZOMBIE, ROBOT, ROBOT_RANGED, TOWER, TEST };
+	public enum SpawnType { ZOMBIE, ROBOT, ROBOT_RANGED, TOWER, TEST, ROBOT_ASSAULT };
 	public enum SpawnNumber { GLOBAL, LOCAL, SINGLE };
 	public SpawnType spawnType;
 	public SpawnNumber spawnNumber;
 	public int numOfSpawns;
+	public Waypoints path;
 	public Vector2 worldSize;
 	public List<Vector3> spawnPositions;
 
@@ -116,6 +117,11 @@ public class SpawnMob : MonoBehaviour {
 						break;
 					case SpawnType.TEST:
 						Network.Instantiate (Resources.Load ("Prefabs/Dummy"), spawnPosition, new Quaternion(), 0);
+						break;
+					case SpawnType.ROBOT_ASSAULT:
+						GameObject robot = Network.Instantiate (Resources.Load ("Prefabs/Robot"), spawnPosition, new Quaternion(), 0) as GameObject;
+						robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+						robot.GetComponent<BotManager>().givenPath = path;
 						break;
 					}
 					

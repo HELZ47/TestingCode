@@ -14,6 +14,7 @@ public class BotManager : MonoBehaviour {
 	public Projectile.DamageType damageType;
 	public float enemyDetectionRange, VIPDetectionRange, movementSpeed, acceleration, stoppingRange, attackingRange;
 	public GameObject projectileStartMarker;
+	public Waypoints givenPath;
 
 	//Not Adjustable
 	public bool targetAquired, VIPFound, isAttacking, hasAttackedThisAnimation;
