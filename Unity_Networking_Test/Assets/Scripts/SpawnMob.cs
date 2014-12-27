@@ -29,6 +29,9 @@ public class SpawnMob : MonoBehaviour {
 				case SpawnType.TOWER:
 					Network.Instantiate (Resources.Load ("Prefabs/Tower"), transform.position, new Quaternion(), 0);
 					break;
+				case SpawnType.ROBOT_RANGED:
+					Network.Instantiate (Resources.Load ("Prefabs/Robot_Ranged"), transform.position, new Quaternion(), 0);
+					break;
 				}
 				break;
 			case SpawnNumber.GLOBAL:
@@ -63,6 +66,9 @@ public class SpawnMob : MonoBehaviour {
 						break;
 					case SpawnType.TOWER:
 						Network.Instantiate (Resources.Load ("Prefabs/Tower"), spawnPosition, new Quaternion(), 0);
+						break;
+					case SpawnType.ROBOT_RANGED:
+						Network.Instantiate (Resources.Load ("Prefabs/Robot_Ranged"), spawnPosition, new Quaternion(), 0);
 						break;
 					}
 
@@ -120,19 +126,26 @@ public class SpawnMob : MonoBehaviour {
 	}
 
 	void OnDrawGizmos () {
+
+		switch (spawnType) {
+		case SpawnType.ROBOT:
+			Gizmos.color = Color.green;
+			break;
+		case SpawnType.ROBOT_RANGED:
+			Gizmos.color = Color.yellow;
+			break;
+		case SpawnType.ZOMBIE:
+			Gizmos.color = Color.red;
+			break;
+		case SpawnType.TOWER:
+			Gizmos.color = Color.blue;
+			break;
+		}
 		if (spawnNumber == SpawnNumber.LOCAL) {
-			switch (spawnType) {
-			case SpawnType.ROBOT:
-				Gizmos.color = Color.green;
-				break;
-			case SpawnType.ZOMBIE:
-				Gizmos.color = Color.red;
-				break;
-			case SpawnType.TOWER:
-				Gizmos.color = Color.blue;
-				break;
-			}
 			Gizmos.DrawCube (transform.position, new Vector3 (worldSize.x, 0.2f, worldSize.y));
+		}
+		else if (spawnNumber == SpawnNumber.SINGLE) {
+			Gizmos.DrawSphere (transform.position, 1f);
 		}
 	}
 }
