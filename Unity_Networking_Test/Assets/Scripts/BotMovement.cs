@@ -130,7 +130,8 @@ public class BotMovement : MonoBehaviour {
 			float closestEnemyDistance = 9999f;
 			//Detect if any target is within range
 			foreach (Collider col in nColliders) {
-				if (col.gameObject.tag == "Mobs") {
+				if ((tag == "Team 1" && col.tag != "Team 1") || 
+				    (tag == "Team 2" && col.tag != "Team 2")) {
 					if (Vector3.Distance (transform.position, col.transform.position) < closestEnemyDistance) {
 						myBotManager.targetAquired = true;
 						myBotManager.TargetTransform = col.gameObject.transform;
