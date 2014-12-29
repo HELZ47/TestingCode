@@ -36,16 +36,14 @@ public class TowerAttack : MonoBehaviour {
 		if (!networkView.isMine) {
 			return;
 		}
+		myTowerManager.targetAquired = false;
 		Collider[] potentialTargets = Physics.OverlapSphere (transform.position, myTowerManager.rangeOfAttack);
 		float shortestDistance = 9999f;
 		foreach (Collider col in potentialTargets) {
-			if (col.tag == "Mobs") {
-				if (shortestDistance == 9999f) {
-					myTowerManager.targetAquired = true;
-					myTowerManager.targetTransform = col.gameObject.transform;
-					shortestDistance = Vector3.Distance (col.gameObject.transform.position, transform.position);
-				}
-				else if (Vector3.Distance (col.gameObject.transform.position, transform.position) < shortestDistance) {
+			if ((tag == "Team 1" && col.tag == "Team 2") ||
+			    (tag == "Team 2" && col.tag == "Team 1") ||
+			    col.tag == "Mobs") {
+				if (Vector3.Distance (col.gameObject.transform.position, transform.position) < shortestDistance) {
 					myTowerManager.targetAquired = true;
 					myTowerManager.targetTransform = col.gameObject.transform;
 					shortestDistance = Vector3.Distance (col.gameObject.transform.position, transform.position);

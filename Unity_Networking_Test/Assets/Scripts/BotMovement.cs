@@ -123,23 +123,30 @@ public class BotMovement : MonoBehaviour {
 				myBotManager.VIPFound = false;
 			}
 			//Reset targetAquired
+//			if (myBotManager.targetAquired && 
+//			    (myBotManager.TargetTransform == null ||
+//			     Vector3.Distance (myBotManager.TargetTransform.position, transform.position) > myBotManager.enemyDetectionRange)) {
+//				myBotManager.targetAquired = false;
+//			}
 			myBotManager.targetAquired = false;
 			//Get the colliders within range
 			Collider[] nColliders = Physics.OverlapSphere (transform.position, myBotManager.enemyDetectionRange);
 			Collider[] vColliders = Physics.OverlapSphere (transform.position, myBotManager.VIPDetectionRange);
 			float closestEnemyDistance = 9999f;
 			//Detect if any target is within range
-			foreach (Collider col in nColliders) {
-				if ((tag == "Team 1" && col.tag != "Team 1") || 
-				    (tag == "Team 2" && col.tag != "Team 2")) {
-					if (Vector3.Distance (transform.position, col.transform.position) < closestEnemyDistance) {
-						myBotManager.targetAquired = true;
-						myBotManager.TargetTransform = col.gameObject.transform;
-						closestEnemyDistance = Vector3.Distance (transform.position, myBotManager.TargetTransform.position);
-					}
+			//if (!myBotManager.targetAquired) {
+				foreach (Collider col in nColliders) {
+					if ((tag == "Team 1" && col.tag == "Team 2") || 
+					    (tag == "Team 2" && col.tag == "Team 1")) {
+						if (Vector3.Distance (transform.position, col.transform.position) < closestEnemyDistance) {
+							myBotManager.targetAquired = true;
+							myBotManager.TargetTransform = col.gameObject.transform;
+							closestEnemyDistance = Vector3.Distance (transform.position, myBotManager.TargetTransform.position);
+						}
 
+					}
 				}
-			}
+			//}
 			//If a VIP hasn't been found, check if any VIP is within range
 			if (!myBotManager.VIPFound) {
 				foreach (Collider col in vColliders) {
