@@ -137,7 +137,8 @@ public class BotMovement : MonoBehaviour {
 			//if (!myBotManager.targetAquired) {
 				foreach (Collider col in nColliders) {
 					if ((tag == "Team 1" && col.tag == "Team 2") || 
-					    (tag == "Team 2" && col.tag == "Team 1")) {
+					    (tag == "Team 2" && col.tag == "Team 1") ||
+				    	col.tag == "Mobs") {
 						if (Vector3.Distance (transform.position, col.transform.position) < closestEnemyDistance) {
 							myBotManager.targetAquired = true;
 							myBotManager.TargetTransform = col.gameObject.transform;

@@ -26,13 +26,15 @@ public class NetworkManager : MonoBehaviour {
 
 	//Start server function
 	public void StartServer () {
-		int listenPort = 25002;
+		int listenPort = 25000; //25002;
 		bool serverInitialized = false;
 		while (!serverInitialized) {
 			//try {
 
 
-			NetworkConnectionError error = Network.InitializeServer (16, listenPort, false); //25002 is default for Unity
+			//NetworkConnectionError error = Network.InitializeServer (16, listenPort, false); //25002 is default for Unity
+			bool useNat = !Network.HavePublicAddress();
+			NetworkConnectionError error = Network.InitializeServer(32, listenPort, useNat);
 			if (error == NetworkConnectionError.NoError) {
 				serverInitialized = true;
 				MasterServer.RegisterHost (registerGameName, "Team_1_Network_Test", "This is a network test");
@@ -198,7 +200,8 @@ public class NetworkManager : MonoBehaviour {
 					for (int i = 0; i < hostData.Length; i++) {
 						if (GUI.Button(new Rect(Screen.width/2, 65f+(30f*i), 300f, 30f), hostData[i].gameName)) {
 							//Connect to that host/server
-							Network.Connect(hostData[i]);
+							NetworkConnectionError error = Network.Connect(hostData[i]);
+							print (error);
 						}
 					}
 				}
