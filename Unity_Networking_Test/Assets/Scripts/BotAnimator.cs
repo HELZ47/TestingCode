@@ -7,7 +7,7 @@ public class BotAnimator : MonoBehaviour {
 	Animator myAnimator;
 	BotManager myBotManager;
 	HealthManager myHealthManager;
-	bool isMoving, takingDamage, isDead, isAttacking;
+	public bool isMoving, takingDamage, isDead, isAttacking;
 	NavMeshAgent myNavMeshAgent;
 	bool rbEnabled;
 
@@ -91,7 +91,7 @@ public class BotAnimator : MonoBehaviour {
 //				}
 //			}
 			takingDamage = false;
-			networkView.RPC("UpdateAnimation", RPCMode.All, isMoving, takingDamage, isDead, isAttacking);
+			//networkView.RPC("UpdateAnimation", RPCMode.All, isMoving, takingDamage, isDead, isAttacking);
 		}
 		else {
 
