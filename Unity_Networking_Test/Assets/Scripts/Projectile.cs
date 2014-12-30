@@ -32,19 +32,21 @@ public class Projectile : MonoBehaviour {
 	[RPC]
 	//RPC calls that sets the variables, this is called when the object is initialized
 	void SetVariables (Vector3 givenDirection, int teamNum) {
-		direction = givenDirection.normalized;
-		teamNumber = (teamNum == 1) ? TeamNumber.TEAM_ONE : TeamNumber.TEAM_TWO;
-		//Propels the projectile according to its projectile type
-		switch (projectileType) {
-		case ProjectileType.BULLET:
-			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
-			break;
-		case ProjectileType.GRENADE:
-			rigidbody.AddForce (direction * speed, ForceMode.Impulse);
-			break;
-		case ProjectileType.ORB:
-			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
-			break;
+		if (Network.isServer) {
+			direction = givenDirection.normalized;
+			teamNumber = (teamNum == 1) ? TeamNumber.TEAM_ONE : TeamNumber.TEAM_TWO;
+			//Propels the projectile according to its projectile type
+			switch (projectileType) {
+			case ProjectileType.BULLET:
+				rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
+				break;
+			case ProjectileType.GRENADE:
+				rigidbody.AddForce (direction * speed, ForceMode.Impulse);
+				break;
+			case ProjectileType.ORB:
+				rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
+				break;
+			}
 		}
 	}
 
@@ -90,6 +92,56 @@ public class Projectile : MonoBehaviour {
 	#endregion
 
 
+	//State synchronize
+	void OnSerializeNetworkView(BitStream stream, NetworkMessageInfo info) {
+		bool hasHit = false;
+		Vector3 position = Vector3.zero;
+		Vector3 velocity = Vector3.zero;
+		if (stream.isWriting) {
+			hasHit = rigidbody.isKinematic;
+			position = transform.position;
+			if (!hasHit) {
+				velocity = rigidbody.velocity;
+			}
+			stream.Serialize(ref hasHit);
+			stream.Serialize(ref position);
+			stream.Serialize(ref velocity);
+		} 
+		else {
+			stream.Serialize(ref hasHit);
+			stream.Serialize(ref position);
+			stream.Serialize(ref velocity);
+			transform.position = position;
+			if (hasHit) {
+				rigidbody.isKinematic = true;
+				rigidbody.detectCollisions = false;
+				projectParticles.Stop ();
+				hitParticles.Play ();
+				GetComponent<Collider>().isTrigger = true;
+				GetComponent<MeshRenderer>().enabled = false;
+			}
+			else {
+				rigidbody.velocity = velocity;
+				//Debug: change the direction of the particles ----------------------------
+				ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
+				int numOfParticles = projectParticles.GetParticles (particles);
+				Vector3 pVelocity = rigidbody.velocity * -1f;
+				if (pVelocity.magnitude > 5f) {
+					pVelocity = pVelocity.normalized * 5f;
+				}
+				int i = 0;
+				while (i<numOfParticles) {
+					particles[i].velocity = pVelocity;
+					i++;
+				}
+				projectParticles.SetParticles (particles, numOfParticles);
+				//---------------------------------
+			}
+		}
+	}
+
+
+
 	// Update is called once per frame
 	void Update () {
 		if (!networkView.isMine) { //This is here because network.destroy can only be called once
@@ -125,7 +177,8 @@ public class Projectile : MonoBehaviour {
 		}
 		//Check if the projectiles has hit anything
 		else {
-			networkView.RPC ("DetectCollision", RPCMode.AllBuffered);
+			//networkView.RPC ("DetectCollision", RPCMode.AllBuffered);
+			DetectCollision ();
 		}
 	}
 	
@@ -228,7 +281,9 @@ public class Projectile : MonoBehaviour {
 		case ProjectileType.ORB:
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (!isHit && hitInfo.collider != this.collider &&
-				    hitInfo.tag != "Projectiles") {
+				    hitInfo.tag != "Projectiles" && 
+				    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+				 	 (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
 					isHit = true;
 					rigidbody.isKinematic = true;
 					rigidbody.detectCollisions = false;
