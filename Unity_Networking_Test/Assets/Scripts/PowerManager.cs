@@ -44,7 +44,8 @@ public class PowerManager : MonoBehaviour {
 		    (rigidbody.velocity - new Vector3(0, rigidbody.velocity.y, 0)).magnitude > 1.5f) {
 			//print ("Power Up");
 			playerManager.particleSize = 30f;
-			networkView.RPC ("ChangeParticleSize", RPCMode.All, 30f);
+			//networkView.RPC ("ChangeParticleSize", RPCMode.All, 30f);
+			//playerManager.particleSize = 30f;
 			playerManager.powerState = PlayerManager.PowerState.Boost;
 			prePowerVelocity = rigidbody.velocity;
 			rigidbody.velocity = (rigidbody.velocity.normalized-new Vector3(0, rigidbody.velocity.normalized.y, 0)) * 20f;
@@ -55,7 +56,8 @@ public class PowerManager : MonoBehaviour {
 		}
 		else if (playerManager.powerState == PlayerManager.PowerState.Boost && timer >= 0.2f) {
 			playerManager.particleSize = 2f;
-			networkView.RPC ("ChangeParticleSize", RPCMode.All, 2f);
+			//networkView.RPC ("ChangeParticleSize", RPCMode.All, 2f);
+			//playerManager.particleSize = 2f;
 			playerManager.powerState = PlayerManager.PowerState.Normal;
 			rigidbody.velocity = prePowerVelocity;
 			timer = 0f;

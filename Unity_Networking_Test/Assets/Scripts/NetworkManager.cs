@@ -18,93 +18,124 @@ public class NetworkManager : MonoBehaviour {
 	public int totalLevelNum = 4;
 	public string[] levelNames;
 
-	// Awake function
+	// Initiate its own/local variables
 	void Awake () {
-		DontDestroyOnLoad (gameObject);
+		DontDestroyOnLoad (gameObject); //Keep the network manager alive through the level transitions
 		levelNames = new string[]{testLevelName, testLevel1Name, testLevel2Name, testLevel3Name};
 	}
 
-	//Start server function
+	//Start the server by registering the host with the master server
 	public void StartServer () {
-		int listenPort = 25000; //25002;
+		int listenPort = 25000; //25002 is Unity default
 		bool serverInitialized = false;
 		while (!serverInitialized) {
-			//try {
-
-
-			//NetworkConnectionError error = Network.InitializeServer (16, listenPort, false); //25002 is default for Unity
-			bool useNat = !Network.HavePublicAddress();
-			NetworkConnectionError error = Network.InitializeServer(32, listenPort, useNat);
+			bool useNat = !Network.HavePublicAddress(); //Test if NAT punch through is needed, it is if there's no public ip address
+			NetworkConnectionError error = Network.InitializeServer(16, listenPort, useNat);
 			if (error == NetworkConnectionError.NoError) {
 				serverInitialized = true;
 				MasterServer.RegisterHost (registerGameName, "Team_1_Network_Test", "This is a network test");
 			}
 			else {
+				print (error);
 				serverInitialized = false;
 				listenPort++;
+				print ("ListenPort changed to " + listenPort);
 			}
-			//}
-//			catch (System.Exception e) {
-//				listenPort++;
-//				continue;
-//			}
-//			serverInitialized = true;
 		}
-		//Network.InitializeServer (16, 25002, false); //25002 is default for Unity
-		//MasterServer.RegisterHost (registerGameName, "Team_1_Network_Test", "This is a network test");
 	}
 
-	//Events built into Unity
+	#region NetworkEvents_Unused
 	void OnServerInitialized () {
 		print ("Server has been initialized!");
 		//SpawnPlayer();
-	}
-
-	void OnMasterServerEvent (MasterServerEvent masterServerEvent) {
-		if (masterServerEvent == MasterServerEvent.RegistrationSucceeded) {
-			print ("Registration Successful!");
-		}
 	}
 
 	void OnConnectedToServer () {
 		print ("Connected to server!");
 		//SpawnPlayer();
 	}
-
-	void OnDisconnectedFromServer(NetworkDisconnection info) {
-		print (info.ToString());
-//		if (Network.isServer) {
-//			Network.Disconnect(200);
-//			MasterServer.UnregisterHost();
-//		}
-
-//		Network.RemoveRPCs (player);
-//		Network.DestroyPlayerObjects (player);
-		Application.LoadLevel (menuLevelName);
-	}
-
 	void OnFailedToConnect(NetworkConnectionError error) {
 		print (error.ToString());
 	}
-
+	
 	void OnFailedToConnectToMasterServer (NetworkConnectionError info) {
 		print (info.ToString());
 	}
-
+	
 	void OnNetworkInstantiate (NetworkMessageInfo info) {
 		print (info.ToString());
 	}
-
+	
 	void OnPlayerConnected () {
+		
+	}
+	#endregion
 
+	#region NetworkEvents_Used
+	void OnMasterServerEvent (MasterServerEvent masterServerEvent) {
+		if (masterServerEvent == MasterServerEvent.RegistrationSucceeded) {
+			print ("Registration Successful!");
+		}
 	}
 
+	void OnDisconnectedFromServer(NetworkDisconnection info) {
+		print (info.ToString());
+		//		if (Network.isServer) {
+		//			Network.Disconnect(200);
+		//			MasterServer.UnregisterHost();
+		//		}
+		
+		//		Network.RemoveRPCs (player);
+		//		Network.DestroyPlayerObjects (player);
+		Application.LoadLevel (menuLevelName);
+	}
+	
+	
+	
 	void OnPlayerDisconnected (NetworkPlayer player) {
 		print ("Clean up after player " + player);
 		Network.RemoveRPCs (player);
 		Network.DestroyPlayerObjects (player);
 	}
 
+	//Called when the application quits and clean up
+	public void OnApplicationQuit () {
+		if (Network.isServer) {
+			Network.Disconnect (200);
+			MasterServer.UnregisterHost();
+		}
+		if (Network.isClient) {
+			Network.Disconnect(200);
+		}
+	}
+	
+	//OnApplicationLoad
+	public void OnLevelWasLoaded(int level) {
+		//If the loaded level is not the main menu
+		if (level != 0) {
+			SpawnPlayer();
+			Network.isMessageQueueRunning = true;
+		}
+	}
+	#endregion
+
+	#region RPC_Calls
+	//RPC function that loads a level
+	[RPC]
+	public void LoadLevel (string levelName, int levelPrefix) {
+		lastLevelPrefix = levelPrefix;
+		//Network.SetSendingEnabled (0, false);
+		Network.isMessageQueueRunning = false;
+		Network.SetLevelPrefix (levelPrefix);
+		Application.LoadLevel (levelName);
+		//yield return null;
+		//yield return null;
+		//Network.isMessageQueueRunning = true;
+		//Network.SetSendingEnabled (0, true);
+	}
+	#endregion
+
+	//Retrieve a list of host information
 	public IEnumerator RefreshHostList () {
 		print ("Refreshing...");
 		MasterServer.RequestHostList (registerGameName);
@@ -112,7 +143,7 @@ public class NetworkManager : MonoBehaviour {
 		float timeStarted = Time.time;
 		float timeEnd = Time.time + refreshRequestLength;
 
-		while (Time.time < timeEnd) {
+		while (Time.time < timeEnd) { //Get the host data for certain set time
 			hostData = MasterServer.PollHostList();
 			yield return new WaitForEndOfFrame();
 		}
@@ -132,44 +163,13 @@ public class NetworkManager : MonoBehaviour {
 		Network.Instantiate (Resources.Load ("Prefabs/Player_ThirdPerson"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
 	}
 
-	//Called when the application quits and clean up
-	public void OnApplicationQuit () {
-		if (Network.isServer) {
-			Network.Disconnect (200);
-			MasterServer.UnregisterHost();
-		}
-		if (Network.isClient) {
-			Network.Disconnect(200);
-		}
-	}
 
-	//OnApplicationLoad
-	public void OnLevelWasLoaded(int level) {
-		//If the loaded level is not the main menu
-		if (level != 0) {
-			SpawnPlayer();
-			Network.isMessageQueueRunning = true;
-		}
-	}
 
-	//RPC function that loads a level
-	[RPC]
-	public void LoadLevel (string levelName, int levelPrefix) {
-		lastLevelPrefix = levelPrefix;
-		//Network.SetSendingEnabled (0, false);
-		Network.isMessageQueueRunning = false;
-		Network.SetLevelPrefix (levelPrefix);
-		Application.LoadLevel (levelName);
-		//yield return null;
-		//yield return null;
-		//Network.isMessageQueueRunning = true;
-		//Network.SetSendingEnabled (0, true);
 
-	}
 
 	//OnGui
 	public void OnGUI () {
-
+		//If the game is in the mainmenu
 		if (Application.loadedLevelName == menuLevelName) {
 			if (Network.isServer) {
 //				if (GUI.Button (new Rect(30f, 30f, 150f, 30f), "Load Test Level")) {
@@ -207,13 +207,14 @@ public class NetworkManager : MonoBehaviour {
 				}
 			}
 		}
+		//IF a game level is loaded
 		else {
-			if (Network.isClient || Network.isServer) {
-				if (GUI.Button(new Rect(25f, 25f, 100f, 30f), "Spawn Player")) {
-					// Spawn a player
-					SpawnPlayer ();
-				}
-			}
+//			if (Network.isClient || Network.isServer) {
+//				if (GUI.Button(new Rect(25f, 25f, 100f, 30f), "Spawn Player")) {
+//					// Spawn a player
+//					SpawnPlayer ();
+//				}
+//			}
 		}
 
 		if (Network.isServer) {

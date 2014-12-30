@@ -15,19 +15,61 @@ public class PlayerManager : MonoBehaviour {
 	public Camera mainCamera;
 	public float particleSize;
 	//public bool activated;
+	MovementController myMovementController;
+	AnimationController myAnimationController;
 
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		movementState = MovementState.IDLE;
 		mainCamera = GetComponentInChildren<Camera> ();
 		powerState = PowerState.Normal;
-//		if (networkView.isMine) {
-//			activated = true;
-//		}
-//		else {
-//			activated = false;
-//		}
+		myMovementController = GetComponent<MovementController> ();
+		myAnimationController = GetComponent<AnimationController> ();
+	}
+
+
+	//State synchronization stuff
+	void OnSerializeNetworkView(BitStream stream, NetworkMessageInfo info) {
+		Vector3 playerForward = Vector3.zero;
+		Vector3 position = Vector3.zero;
+		Vector3 rbVelocity = Vector3.zero;
+		int direction = 0, movementType = 0;
+		bool jump = false;
+		float partSize = 0f;
+		if (stream.isWriting) {
+			//Sending
+			playerForward = myMovementController.playerTransform.forward;
+			position = transform.position;
+			rbVelocity = rigidbody.velocity;
+			direction = myAnimationController.direction;
+			movementType = myAnimationController.movementType;
+			jump = myAnimationController.jump;
+			partSize = particleSize;
+			stream.Serialize(ref playerForward);
+			stream.Serialize (ref position);
+			stream.Serialize (ref rbVelocity);
+			stream.Serialize (ref direction);
+			stream.Serialize (ref movementType);
+			stream.Serialize (ref jump);
+			stream.Serialize (ref partSize);
+		} else {
+			//Receiving
+			stream.Serialize(ref playerForward);
+			stream.Serialize (ref position);
+			stream.Serialize (ref rbVelocity);
+			stream.Serialize (ref direction);
+			stream.Serialize (ref movementType);
+			stream.Serialize (ref jump);
+			stream.Serialize (ref partSize);
+			myMovementController.playerTransform.forward = playerForward;
+			transform.position = position;
+			rigidbody.velocity = rbVelocity;
+			myAnimationController.animator.SetInteger ("direction", direction);
+			myAnimationController.animator.SetInteger ("movementType", movementType);
+			myAnimationController.animator.SetBool ("jump", jump);
+			particleSize = partSize;
+		}
 	}
 
 

@@ -7,6 +7,8 @@ public class AnimationController : MonoBehaviour {
 	//public Animation animation;
 	public Animator animator;
 	PlayerManager playerManager;
+	public int direction, movementType;
+	public bool jump;
 
 
 	// Use this for initialization
@@ -125,12 +127,9 @@ public class AnimationController : MonoBehaviour {
 
 
 
-
-
-
 		if (networkView.isMine) {
-			int direction = 8, movementType = 3;
-			bool jump = false;
+//			int direction = 8, movementType = 3;
+//			bool jump = false;
 			/*Change the player's animation based on the current movement state and direction
 			 -direction: 0->forward, 1->forward_right, 2->right, 3->backward_right, 4->backward, 5->backward_left,
 			 	6->left, 7->forward_left, 8->NULL
@@ -254,7 +253,10 @@ public class AnimationController : MonoBehaviour {
 				//}
 				break;
 			}
-			networkView.RPC ("UpdateAnimation", RPCMode.All, direction, movementType, jump);
+			animator.SetInteger ("direction", direction);
+			animator.SetInteger ("movementType", movementType);
+			animator.SetBool ("jump", jump);
+			//networkView.RPC ("UpdateAnimation", RPCMode.All, direction, movementType, jump);
 		}
 	}
 }

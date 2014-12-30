@@ -125,6 +125,7 @@ public class MovementController : MonoBehaviour {
 	}
 
 
+
 	//Check the keyboard input and update the player accordingly
 	void CheckInput () {
 

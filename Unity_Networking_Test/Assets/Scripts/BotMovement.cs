@@ -119,7 +119,8 @@ public class BotMovement : MonoBehaviour {
 			rbEnabled = !rigidbody.isKinematic;
 
 			//If VIP gets outside of the VIPDetection range, VIP found becomes false
-			if (myBotManager.VIPFound && Vector3.Distance(transform.position, myBotManager.VIPTransform.position) > myBotManager.VIPDetectionRange) {
+			if (myBotManager.VIPFound && (myBotManager.VIPTransform == null || 
+			    Vector3.Distance(transform.position, myBotManager.VIPTransform.position) > myBotManager.VIPDetectionRange)) {
 				myBotManager.VIPFound = false;
 			}
 			//Reset targetAquired
