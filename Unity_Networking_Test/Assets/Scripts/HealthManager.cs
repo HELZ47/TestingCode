@@ -8,7 +8,7 @@ public class HealthManager : MonoBehaviour {
 	public float hitPoints;
 	public float armourValue;
 	public bool isTakingDamage, isDead, deathAnimationFinished;
-	float fullHPAmount;
+	public float fullHPAmount;
 
 	void Awake () {
 		fullHPAmount = hitPoints;
@@ -21,14 +21,14 @@ public class HealthManager : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		float remainingHPRatio = hitPoints / fullHPAmount;
-		Color hColor = new Color (remainingHPRatio, remainingHPRatio, remainingHPRatio);
-		if (GetComponent<Renderer>() != null) {
-			renderer.material.color = hColor;
-		}
-		else if (GetComponentInChildren<Renderer>() != null) {
-			GetComponentInChildren<Renderer>().material.color = hColor;
-		}
+//		float remainingHPRatio = hitPoints / fullHPAmount;
+//		Color hColor = new Color (remainingHPRatio, remainingHPRatio, remainingHPRatio);
+//		if (GetComponent<Renderer>() != null) {
+//			renderer.material.color = hColor;
+//		}
+//		else if (GetComponentInChildren<Renderer>() != null) {
+//			GetComponentInChildren<Renderer>().material.color = hColor;
+//		}
 
 
 		if (Network.isServer) {
@@ -39,6 +39,7 @@ public class HealthManager : MonoBehaviour {
 			}
 		}
 	}
+
 
 
 	[RPC]

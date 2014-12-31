@@ -59,6 +59,7 @@
      <Compile Include="Assets\Scripts\FirstPersonKeys.cs" />
      <Compile Include="Assets\Scripts\GlobalSettings.cs" />
      <Compile Include="Assets\Scripts\HealthManager.cs" />
+     <Compile Include="Assets\Scripts\HealthUIManager.cs" />
      <Compile Include="Assets\Scripts\Launch_Projectile.cs" />
      <Compile Include="Assets\Scripts\MainMenu.cs" />
      <Compile Include="Assets\Scripts\MobAnimationController.cs" />
