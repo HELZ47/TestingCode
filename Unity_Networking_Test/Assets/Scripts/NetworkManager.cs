@@ -32,6 +32,10 @@ public class NetworkManager : MonoBehaviour {
 
 	//Start the server by registering the host with the master server
 	public void StartServer () {
+		if (Network.isServer) {
+			return;
+		}
+		StopAllCoroutines ();
 		int listenPort = 25000; //25002 is Unity default
 		bool serverInitialized = false;
 		while (!serverInitialized) {
@@ -48,6 +52,7 @@ public class NetworkManager : MonoBehaviour {
 				print ("ListenPort changed to " + listenPort);
 			}
 		}
+		ShowLevels ();
 	}
 
 	#region NetworkEvents_Unused
@@ -75,15 +80,16 @@ public class NetworkManager : MonoBehaviour {
 	void OnPlayerConnected () {
 		
 	}
-	#endregion
 
-	#region NetworkEvents_Used
 	void OnMasterServerEvent (MasterServerEvent masterServerEvent) {
 		if (masterServerEvent == MasterServerEvent.RegistrationSucceeded) {
 			print ("Registration Successful!");
 		}
 	}
+	#endregion
 
+	#region NetworkEvents_Used
+	//If the client is disconnected from the server, load back to the main menu
 	void OnDisconnectedFromServer(NetworkDisconnection info) {
 		print (info.ToString());
 		//		if (Network.isServer) {
@@ -171,7 +177,9 @@ public class NetworkManager : MonoBehaviour {
 	}
 
 	public void RefreshHList () {
-		StartCoroutine("RefreshHostList");
+		if (!Network.isServer) {
+			StartCoroutine("RefreshHostList");
+		}
 	}
 
 	public void HostRefresh () {
