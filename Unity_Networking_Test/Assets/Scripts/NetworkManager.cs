@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class NetworkManager : MonoBehaviour {
 
@@ -18,10 +20,14 @@ public class NetworkManager : MonoBehaviour {
 	public int totalLevelNum = 4;
 	public string[] levelNames;
 
+	public RectTransform panelTransform;
+	List<GameObject> UI_Buttons;
+
 	// Initiate its own/local variables
 	void Awake () {
 		DontDestroyOnLoad (gameObject); //Keep the network manager alive through the level transitions
 		levelNames = new string[]{testLevelName, testLevel1Name, testLevel2Name, testLevel3Name};
+		UI_Buttons = new List<GameObject> ();
 	}
 
 	//Start the server by registering the host with the master server
@@ -145,6 +151,7 @@ public class NetworkManager : MonoBehaviour {
 
 		while (Time.time < timeEnd) { //Get the host data for certain set time
 			hostData = MasterServer.PollHostList();
+			HostRefresh (); //Debug
 			yield return new WaitForEndOfFrame();
 		}
 
@@ -163,8 +170,26 @@ public class NetworkManager : MonoBehaviour {
 		Network.Instantiate (Resources.Load ("Prefabs/Player_ThirdPerson"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
 	}
 
+	public void RefreshHList () {
+		StartCoroutine("RefreshHostList");
+	}
 
-
+	public void HostRefresh () {
+		if (hostData.Length != UI_Buttons.Count) {
+			for(int i = 0; i < UI_Buttons.Count; i++) {
+				Destroy (UI_Buttons[i]);
+				print ("Button deleted!");
+			}
+			UI_Buttons.Clear();
+			for (int i = 0; i < hostData.Length; i++) {
+				GameObject button = Instantiate (Resources.Load ("Prefabs/UI_Button"), Vector3.zero, new Quaternion ()) as GameObject;
+				button.transform.SetParent (panelTransform, true);
+				UI_Buttons.Add (button);
+				print ("Button created!");
+//				print (button);
+			}
+		}
+	}
 
 
 	//OnGui
@@ -185,24 +210,28 @@ public class NetworkManager : MonoBehaviour {
 				}
 			}
 			else if (!Network.isClient && !Network.isServer) {
-				if (GUI.Button(new Rect(25f, 25f, 150f, 30f), "Start New Server")) {
-					// Start Server Function Here
-					StartServer ();
-				}
-				
-				if (GUI.Button(new Rect(25f, 60f, 150f, 30f), "Refresh Server List:")) {
-					//Refresh Server List Function Here
-					StartCoroutine("RefreshHostList");
-				}
+//				if (GUI.Button(new Rect(25f, 25f, 150f, 30f), "Start New Server")) {
+//					// Start Server Function Here
+//					StartServer ();
+//				}
+//				
+//				if (GUI.Button(new Rect(25f, 60f, 150f, 30f), "Refresh Server List:")) {
+//					//Refresh Server List Function Here
+//					StartCoroutine("RefreshHostList");
+//				}
 				
 				//Display a button for each host found
 				if (hostData != null) {
 					for (int i = 0; i < hostData.Length; i++) {
-						if (GUI.Button(new Rect(Screen.width/2, 65f+(30f*i), 300f, 30f), hostData[i].gameName)) {
-							//Connect to that host/server
-							NetworkConnectionError error = Network.Connect(hostData[i]);
-							print (error);
-						}
+//						GameObject button = Instantiate (Resources.Load ("Prefabs/UI_Button"), Vector3.zero, new Quaternion ()) as GameObject;
+//						//button.GetComponent<RectTransform>().SetParent (panelTransform, true);
+//						button.transform.SetParent (panelTransform, true);
+//						print (button);
+//						if (GUI.Button(new Rect(Screen.width/2, 65f+(30f*i), 300f, 30f), hostData[i].gameName)) {
+//							//Connect to that host/server
+//							NetworkConnectionError error = Network.Connect(hostData[i]);
+//							print (error);
+//						}
 					}
 				}
 			}
