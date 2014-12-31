@@ -7,7 +7,7 @@ public class NetworkManager : MonoBehaviour {
 
 	//Fields
 	string registerGameName = "UbisoftCompetitionConcordiaTeam1";
-	bool isRefreshing = false;
+	//bool isRefreshing = false;
 	float refreshRequestLength = 3f;
 	HostData[] hostData;
 	int lastLevelPrefix = 0;
@@ -30,14 +30,18 @@ public class NetworkManager : MonoBehaviour {
 		UI_Buttons = new List<GameObject> ();
 	}
 
+
+	#region Start the server and show the levels
 	//Start the server by registering the host with the master server
 	public void StartServer () {
+		//IF the program is already a server, then don't execute the function
 		if (Network.isServer) {
 			return;
 		}
-		StopAllCoroutines ();
-		int listenPort = 25000; //25002 is Unity default
+		StopAllCoroutines (); //If the program was pulling the host info, stop that before start the server
+		int listenPort = 25000; //25002 is Unity default, but apparantly 25000 works
 		bool serverInitialized = false;
+		//Keep changing listenning ports until the game session is registered to the master server
 		while (!serverInitialized) {
 			bool useNat = !Network.HavePublicAddress(); //Test if NAT punch through is needed, it is if there's no public ip address
 			NetworkConnectionError error = Network.InitializeServer(16, listenPort, useNat);
@@ -52,8 +56,32 @@ public class NetworkManager : MonoBehaviour {
 				print ("ListenPort changed to " + listenPort);
 			}
 		}
+		//Show the levels that can be loaded as buttons inside of the panel
 		ShowLevels ();
 	}
+
+	//Refresh and show buttons that represents the levels to be loaded
+	public void ShowLevels () {
+		for(int i = 0; i < UI_Buttons.Count; i++) {
+			Destroy (UI_Buttons[i]);
+			print ("Button deleted!");
+		}
+		UI_Buttons.Clear();
+		for (int i = 0; i < totalLevelNum; i++) {
+			int levelIndex = i;
+			GameObject button = Instantiate (Resources.Load ("Prefabs/UI_Button"), Vector3.zero, new Quaternion ()) as GameObject;
+			button.transform.SetParent (panelTransform, true);
+			button.GetComponent<Button>().onClick.AddListener (() => LoadLevelHelper(levelNames[levelIndex]));
+			button.GetComponent<Button>().GetComponentInChildren<Text>().text = levelNames[levelIndex];
+			UI_Buttons.Add (button);
+			//			if (GUI.Button(new Rect(Screen.width/2, (30f*i), 300f, 30f), "Load " + levelNames[i])) {
+			//				//Load the chosen level
+			//				networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelNames[i], lastLevelPrefix+1);
+			//			}
+		}
+	}
+	#endregion
+
 
 	#region NetworkEvents_Unused
 	void OnServerInitialized () {
@@ -92,18 +120,10 @@ public class NetworkManager : MonoBehaviour {
 	//If the client is disconnected from the server, load back to the main menu
 	void OnDisconnectedFromServer(NetworkDisconnection info) {
 		print (info.ToString());
-		//		if (Network.isServer) {
-		//			Network.Disconnect(200);
-		//			MasterServer.UnregisterHost();
-		//		}
-		
-		//		Network.RemoveRPCs (player);
-		//		Network.DestroyPlayerObjects (player);
 		Application.LoadLevel (menuLevelName);
 	}
 	
-	
-	
+	//IF a player is disconnected, clean up after than player by removing its RPCs and distroy its objects
 	void OnPlayerDisconnected (NetworkPlayer player) {
 		print ("Clean up after player " + player);
 		Network.RemoveRPCs (player);
@@ -123,7 +143,7 @@ public class NetworkManager : MonoBehaviour {
 	
 	//OnApplicationLoad
 	public void OnLevelWasLoaded(int level) {
-		//If the loaded level is not the main menu
+		//If the loaded level is not the main menu, spawn the player
 		if (level != 0) {
 			SpawnPlayer();
 			Network.isMessageQueueRunning = true;
@@ -131,7 +151,12 @@ public class NetworkManager : MonoBehaviour {
 	}
 	#endregion
 
-	#region RPC_Calls
+	#region Load Level
+	//The RPC helper function that calls the RPC function to load the level
+	public void LoadLevelHelper (string levelName) {
+		networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelName, lastLevelPrefix+1);
+	}
+
 	//RPC function that loads a level
 	[RPC]
 	public void LoadLevel (string levelName, int levelPrefix) {
@@ -147,20 +172,34 @@ public class NetworkManager : MonoBehaviour {
 	}
 	#endregion
 
+	#region Pull Host List and connect to a host
+	//Refrest the list of hosts by starting a coroutine that pulls the hosts for a set time
+	public void RefreshHList () {
+		if (!Network.isServer) {
+			StopAllCoroutines ();
+			StartCoroutine("RefreshHostList");
+		}
+//		else {
+//			StopAllCoroutines ();
+//			MasterServer.UnregisterHost();
+//			Network.Disconnect (200);
+//			//StartCoroutine("RefreshHostList");
+//		}
+	}
+
 	//Retrieve a list of host information
 	public IEnumerator RefreshHostList () {
 		print ("Refreshing...");
 		MasterServer.RequestHostList (registerGameName);
-
 		float timeStarted = Time.time;
 		float timeEnd = Time.time + refreshRequestLength;
-
-		while (Time.time < timeEnd) { //Get the host data for certain set time
+		//Get the host data for certain set time
+		while (Time.time < timeEnd) { 
 			hostData = MasterServer.PollHostList();
-			HostRefresh (); //Debug
+			HostRefresh (); //Refresh and display the buttons that represents the hosts
 			yield return new WaitForEndOfFrame();
 		}
-
+		//Debug output that shows whether any server has been found, at the end of the refresh time
 		if (hostData == null || hostData.Length == 0) {
 			print ("No active servers have been found.");
 		}
@@ -169,19 +208,7 @@ public class NetworkManager : MonoBehaviour {
 		}
 	}
 
-	//Spawnning a player through the network
-	public void SpawnPlayer () {
-		print ("Spawning player...");
-		//Network.Instantiate (Resources.Load ("Prefabs/Player"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
-		Network.Instantiate (Resources.Load ("Prefabs/Player_ThirdPerson"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
-	}
-
-	public void RefreshHList () {
-		if (!Network.isServer) {
-			StartCoroutine("RefreshHostList");
-		}
-	}
-
+	//Refresh and display the list of buttons that connects to the available hosts
 	public void HostRefresh () {
 		if (hostData.Length != UI_Buttons.Count) {
 			for(int i = 0; i < UI_Buttons.Count; i++) {
@@ -196,104 +223,85 @@ public class NetworkManager : MonoBehaviour {
 				button.GetComponent<Button>().onClick.AddListener (() => ConnectToHost(hostIndex));
 				button.GetComponent<Button>().GetComponentInChildren<Text>().text = hostData[hostIndex].gameName;
 				UI_Buttons.Add (button);
-
 				//UI_Buttons[i].GetComponent<Button>().onClick.AddListener (() => ConnectToHost(i));
 				print ("Button created on index " + j);
-//				print (button);
+				//				print (button);
 			}
 		}
 	}
 
+	//Helper function that connect to hosts, this is linked to the host buttons
 	public void ConnectToHost (int hostIndex) {
 		print ("Connect to host " + hostIndex);
 		Network.Connect (hostData [hostIndex]);
 	}
+	#endregion
 
-	void Update () {
-//		if (UI_Buttons.Count > 0) {
-//			for (int i = 0; i < UI_Buttons.Count; i++) {
-//				UI_Buttons[i].GetComponent<Button>().onClick.AddListener (ConnectToHostButton(i));
-//			}
-//		}
+
+	//Spawnning a player through the network
+	public void SpawnPlayer () {
+		print ("Spawning player...");
+		//Network.Instantiate (Resources.Load ("Prefabs/Player"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
+		Network.Instantiate (Resources.Load ("Prefabs/Player_ThirdPerson"), new Vector3 (0, 1, 0), Quaternion.identity, 0);
 	}
 
-	public void LoadLevelHelper (string levelName) {
-		networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelName, lastLevelPrefix+1);
-	}
 
-	public void ShowLevels () {
-		for(int i = 0; i < UI_Buttons.Count; i++) {
-			Destroy (UI_Buttons[i]);
-			print ("Button deleted!");
-		}
-		UI_Buttons.Clear();
-		for (int i = 0; i < totalLevelNum; i++) {
-			int levelIndex = i;
-			GameObject button = Instantiate (Resources.Load ("Prefabs/UI_Button"), Vector3.zero, new Quaternion ()) as GameObject;
-			button.transform.SetParent (panelTransform, true);
-			button.GetComponent<Button>().onClick.AddListener (() => LoadLevelHelper(levelNames[levelIndex]));
-			button.GetComponent<Button>().GetComponentInChildren<Text>().text = levelNames[levelIndex];
-			UI_Buttons.Add (button);
-//			if (GUI.Button(new Rect(Screen.width/2, (30f*i), 300f, 30f), "Load " + levelNames[i])) {
-//				//Load the chosen level
-//				networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelNames[i], lastLevelPrefix+1);
-//			}
-		}
-	}
+
+
 
 	//OnGui
 	public void OnGUI () {
 		//If the game is in the mainmenu
-		if (Application.loadedLevelName == menuLevelName) {
-			if (Network.isServer) {
-//				if (GUI.Button (new Rect(30f, 30f, 150f, 30f), "Load Test Level")) {
-//					//Application.LoadLevel (testLevelName);
-//					networkView.RPC ("LoadLevel", RPCMode.AllBuffered, testLevelName, lastLevelPrefix+1);
-//				}
-//				for (int i = 0; i < totalLevelNum; i++) {
-//					if (GUI.Button(new Rect(Screen.width/2, (30f*i), 300f, 30f), "Load " + levelNames[i])) {
-//						//Load the chosen level
-//						//Network.Connect(hostData[i]);
-//						networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelNames[i], lastLevelPrefix+1);
+//		if (Application.loadedLevelName == menuLevelName) {
+//			if (Network.isServer) {
+////				if (GUI.Button (new Rect(30f, 30f, 150f, 30f), "Load Test Level")) {
+////					//Application.LoadLevel (testLevelName);
+////					networkView.RPC ("LoadLevel", RPCMode.AllBuffered, testLevelName, lastLevelPrefix+1);
+////				}
+////				for (int i = 0; i < totalLevelNum; i++) {
+////					if (GUI.Button(new Rect(Screen.width/2, (30f*i), 300f, 30f), "Load " + levelNames[i])) {
+////						//Load the chosen level
+////						//Network.Connect(hostData[i]);
+////						networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelNames[i], lastLevelPrefix+1);
+////					}
+////				}
+//			}
+//			else if (!Network.isClient && !Network.isServer) {
+////				if (GUI.Button(new Rect(25f, 25f, 150f, 30f), "Start New Server")) {
+////					// Start Server Function Here
+////					StartServer ();
+////				}
+////				
+////				if (GUI.Button(new Rect(25f, 60f, 150f, 30f), "Refresh Server List:")) {
+////					//Refresh Server List Function Here
+////					StartCoroutine("RefreshHostList");
+////				}
+//				
+//				//Display a button for each host found
+//				if (hostData != null) {
+//					for (int i = 0; i < hostData.Length; i++) {
+////						GameObject button = Instantiate (Resources.Load ("Prefabs/UI_Button"), Vector3.zero, new Quaternion ()) as GameObject;
+////						//button.GetComponent<RectTransform>().SetParent (panelTransform, true);
+////						button.transform.SetParent (panelTransform, true);
+////						print (button);
+////						if (GUI.Button(new Rect(Screen.width/2, 65f+(30f*i), 300f, 30f), hostData[i].gameName)) {
+////							//Connect to that host/server
+////							NetworkConnectionError error = Network.Connect(hostData[i]);
+////							print (error);
+////						}
 //					}
 //				}
-			}
-			else if (!Network.isClient && !Network.isServer) {
-//				if (GUI.Button(new Rect(25f, 25f, 150f, 30f), "Start New Server")) {
-//					// Start Server Function Here
-//					StartServer ();
-//				}
-//				
-//				if (GUI.Button(new Rect(25f, 60f, 150f, 30f), "Refresh Server List:")) {
-//					//Refresh Server List Function Here
-//					StartCoroutine("RefreshHostList");
-//				}
-				
-				//Display a button for each host found
-				if (hostData != null) {
-					for (int i = 0; i < hostData.Length; i++) {
-//						GameObject button = Instantiate (Resources.Load ("Prefabs/UI_Button"), Vector3.zero, new Quaternion ()) as GameObject;
-//						//button.GetComponent<RectTransform>().SetParent (panelTransform, true);
-//						button.transform.SetParent (panelTransform, true);
-//						print (button);
-//						if (GUI.Button(new Rect(Screen.width/2, 65f+(30f*i), 300f, 30f), hostData[i].gameName)) {
-//							//Connect to that host/server
-//							NetworkConnectionError error = Network.Connect(hostData[i]);
-//							print (error);
-//						}
-					}
-				}
-			}
-		}
-		//IF a game level is loaded
-		else {
-//			if (Network.isClient || Network.isServer) {
-//				if (GUI.Button(new Rect(25f, 25f, 100f, 30f), "Spawn Player")) {
-//					// Spawn a player
-//					SpawnPlayer ();
-//				}
 //			}
-		}
+//		}
+//		//IF a game level is loaded
+//		else {
+////			if (Network.isClient || Network.isServer) {
+////				if (GUI.Button(new Rect(25f, 25f, 100f, 30f), "Spawn Player")) {
+////					// Spawn a player
+////					SpawnPlayer ();
+////				}
+////			}
+//		}
 
 		if (Network.isServer) {
 			GUILayout.Label("Running as a server.");
