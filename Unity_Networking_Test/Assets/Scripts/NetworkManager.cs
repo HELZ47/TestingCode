@@ -209,6 +209,30 @@ public class NetworkManager : MonoBehaviour {
 //		}
 	}
 
+	public void LoadLevelHelper (string levelName) {
+		networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelName, lastLevelPrefix+1);
+	}
+
+	public void ShowLevels () {
+		for(int i = 0; i < UI_Buttons.Count; i++) {
+			Destroy (UI_Buttons[i]);
+			print ("Button deleted!");
+		}
+		UI_Buttons.Clear();
+		for (int i = 0; i < totalLevelNum; i++) {
+			int levelIndex = i;
+			GameObject button = Instantiate (Resources.Load ("Prefabs/UI_Button"), Vector3.zero, new Quaternion ()) as GameObject;
+			button.transform.SetParent (panelTransform, true);
+			button.GetComponent<Button>().onClick.AddListener (() => LoadLevelHelper(levelNames[levelIndex]));
+			button.GetComponent<Button>().GetComponentInChildren<Text>().text = levelNames[levelIndex];
+			UI_Buttons.Add (button);
+//			if (GUI.Button(new Rect(Screen.width/2, (30f*i), 300f, 30f), "Load " + levelNames[i])) {
+//				//Load the chosen level
+//				networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelNames[i], lastLevelPrefix+1);
+//			}
+		}
+	}
+
 	//OnGui
 	public void OnGUI () {
 		//If the game is in the mainmenu
@@ -218,13 +242,13 @@ public class NetworkManager : MonoBehaviour {
 //					//Application.LoadLevel (testLevelName);
 //					networkView.RPC ("LoadLevel", RPCMode.AllBuffered, testLevelName, lastLevelPrefix+1);
 //				}
-				for (int i = 0; i < totalLevelNum; i++) {
-					if (GUI.Button(new Rect(Screen.width/2, (30f*i), 300f, 30f), "Load " + levelNames[i])) {
-						//Load the chosen level
-						//Network.Connect(hostData[i]);
-						networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelNames[i], lastLevelPrefix+1);
-					}
-				}
+//				for (int i = 0; i < totalLevelNum; i++) {
+//					if (GUI.Button(new Rect(Screen.width/2, (30f*i), 300f, 30f), "Load " + levelNames[i])) {
+//						//Load the chosen level
+//						//Network.Connect(hostData[i]);
+//						networkView.RPC ("LoadLevel", RPCMode.AllBuffered, levelNames[i], lastLevelPrefix+1);
+//					}
+//				}
 			}
 			else if (!Network.isClient && !Network.isServer) {
 //				if (GUI.Button(new Rect(25f, 25f, 150f, 30f), "Start New Server")) {
