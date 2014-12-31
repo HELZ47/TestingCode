@@ -181,16 +181,33 @@ public class NetworkManager : MonoBehaviour {
 				print ("Button deleted!");
 			}
 			UI_Buttons.Clear();
-			for (int i = 0; i < hostData.Length; i++) {
+			for (int j = 0; j < hostData.Length; j++) {
 				GameObject button = Instantiate (Resources.Load ("Prefabs/UI_Button"), Vector3.zero, new Quaternion ()) as GameObject;
 				button.transform.SetParent (panelTransform, true);
+				int hostIndex = j;
+				button.GetComponent<Button>().onClick.AddListener (() => ConnectToHost(hostIndex));
+				button.GetComponent<Button>().GetComponentInChildren<Text>().text = hostData[hostIndex].gameName;
 				UI_Buttons.Add (button);
-				print ("Button created!");
+
+				//UI_Buttons[i].GetComponent<Button>().onClick.AddListener (() => ConnectToHost(i));
+				print ("Button created on index " + j);
 //				print (button);
 			}
 		}
 	}
 
+	public void ConnectToHost (int hostIndex) {
+		print ("Connect to host " + hostIndex);
+		Network.Connect (hostData [hostIndex]);
+	}
+
+	void Update () {
+//		if (UI_Buttons.Count > 0) {
+//			for (int i = 0; i < UI_Buttons.Count; i++) {
+//				UI_Buttons[i].GetComponent<Button>().onClick.AddListener (ConnectToHostButton(i));
+//			}
+//		}
+	}
 
 	//OnGui
 	public void OnGUI () {
