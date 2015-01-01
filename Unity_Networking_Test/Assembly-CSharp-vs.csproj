@@ -55,7 +55,6 @@
      <Compile Include="Assets\Scripts\Bot_NavMesh_Movement.cs" />
      <Compile Include="Assets\Scripts\CameraEnabler.cs" />
      <Compile Include="Assets\Scripts\ChangeColor.cs" />
-     <Compile Include="Assets\Scripts\ConnectToHostButton.cs" />
      <Compile Include="Assets\Scripts\FirstPersonKeys.cs" />
      <Compile Include="Assets\Scripts\GlobalSettings.cs" />
      <Compile Include="Assets\Scripts\HealthManager.cs" />

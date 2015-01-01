@@ -1,25 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//The main manager for the towers
 public class TowerManager : MonoBehaviour {
 
-	//Fields
+	#region Fields
 	//Adjustable
-	public float timeBetweenShotsInSecond;
-	public float rangeOfAttack;
-	public GameObject startPosObject;
+	public float timeBetweenShotsInSecond; //Fire rate
+	public float rangeOfAttack; //Fire range
+	public GameObject startPosObject; //Object which position the projectile starts at
+
 	//Not Adjustable
+	[HideInInspector]
 	public bool targetAquired;
 	public Transform targetTransform;
 	public Vector3 projectileStartPosition;
+	#endregion
 
-	// Use this for initialization
+
+	// Initialize internal valriables
 	void Awake () {
+		//Get the projectile start position from the start object
 		projectileStartPosition = startPosObject.transform.position;
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
 	}
 }

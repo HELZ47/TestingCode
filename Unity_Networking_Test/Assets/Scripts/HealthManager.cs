@@ -5,32 +5,26 @@ using System.Collections;
 public class HealthManager : MonoBehaviour {
 
 	//Fields
+
+	//Adjustable
 	public float hitPoints;
 	public float armourValue;
+
+	//Not adjustable
+	[HideInInspector]
 	public bool isTakingDamage, isDead, deathAnimationFinished;
 	public float fullHPAmount;
 
+
+	//Initialize internal variables
 	void Awake () {
 		fullHPAmount = hitPoints;
-	}
-
-	// Use this for initialization
-	void Start () {
 	}
 
 
 	// Update is called once per frame
 	void Update () {
-//		float remainingHPRatio = hitPoints / fullHPAmount;
-//		Color hColor = new Color (remainingHPRatio, remainingHPRatio, remainingHPRatio);
-//		if (GetComponent<Renderer>() != null) {
-//			renderer.material.color = hColor;
-//		}
-//		else if (GetComponentInChildren<Renderer>() != null) {
-//			GetComponentInChildren<Renderer>().material.color = hColor;
-//		}
-
-
+		//If the object is dead and its death animation is finished, the server will then remove this object
 		if (Network.isServer) {
 			if ((isDead && GetComponent<Animator>() == null) ||
 			    (isDead && GetComponent<Animator>() != null && deathAnimationFinished)) {
@@ -41,20 +35,23 @@ public class HealthManager : MonoBehaviour {
 	}
 
 
-
+	//Update all instances of the object with the newest HP value
 	[RPC]
-	void ReduceHitpoint (float damage) {
-		hitPoints -= damage;
+	void UpdateHP (float newHP) {
+		hitPoints = newHP;
 		isTakingDamage = true;
 		if (hitPoints <= 0) {
 			isDead = true;
 		}
 	}
 
-	//Receives damage
+
+	//Receives the dealt damage and perform calculations on how much of it is really going to affect the HP
 	public void ReceiveDamage (float damageAmount, Projectile.DamageType damageType, Projectile.DamageElement damageElement) {
-		//hitPoints -= damageAmount;
-		//GetComponent<Animator> ().SetBool ("receiveDamage", true);
-		networkView.RPC ("ReduceHitpoint", RPCMode.AllBuffered, damageAmount);
+		//The server performs the calculation then synchronize it with everyone else through RPC
+		if (Network.isServer) {
+			hitPoints -= damageAmount; //This is the most basic algorithm, not account for armor and whatnot
+			networkView.RPC ("UpdateHP", RPCMode.AllBuffered, hitPoints);
+		}
 	}
 }

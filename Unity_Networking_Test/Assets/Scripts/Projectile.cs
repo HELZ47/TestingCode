@@ -2,14 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 
-//The script the controls the projectile
+//The script the controls the projectile (everything)
 public class Projectile : MonoBehaviour {
 
-	//Fields
+	#region Fields
+	//Public Types as ENUMs
 	public enum ProjectileType { BULLET, GRENADE, ORB }
 	public enum DamageElement { PHYSICAL, FIRE, WATER, ICE, ELECTRIC };
 	public enum DamageType { DIRECT, SPLASH, MELEE }
-	public enum TeamNumber { TEAM_ONE, TEAM_TWO }
+	public enum TeamNumber { TEAM_ONE, TEAM_TWO, OTHER }
 	//Adjustable
 	public ProjectileType projectileType;
 	public DamageElement damageElement;
@@ -27,14 +28,27 @@ public class Projectile : MonoBehaviour {
 	float timeAlive;
 	bool isHit;
 	bool damageDealt;
+	#endregion
+
 
 	#region Initialization
 	[RPC]
-	//RPC calls that sets the variables, this is called when the object is initialized
+	//RPC calls the server to set the variables, this is called when the object is initialized
 	void SetVariables (Vector3 givenDirection, int teamNum) {
 		if (Network.isServer) {
+			//Set the direction and the team number of the projectile
 			direction = givenDirection.normalized;
-			teamNumber = (teamNum == 1) ? TeamNumber.TEAM_ONE : TeamNumber.TEAM_TWO;
+			switch (teamNum) {
+			case 1:
+				teamNumber = TeamNumber.TEAM_ONE;
+				break;
+			case 2:
+				teamNumber = TeamNumber.TEAM_TWO;
+				break;
+			default:
+				teamNumber = TeamNumber.OTHER;
+				break;
+			}
 			//Propels the projectile according to its projectile type
 			switch (projectileType) {
 			case ProjectileType.BULLET:
@@ -49,37 +63,12 @@ public class Projectile : MonoBehaviour {
 			}
 		}
 	}
-
-//	[RPC]
-//	//RPC calls that sets the variables, this is called when the object is initialized
-//	void SetDirection (Vector3 givenDirection) {
-//		direction = givenDirection.normalized;
-//		//Propels the projectile according to its projectile type
-//		switch (projectileType) {
-//		case ProjectileType.BULLET:
-//			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
-//			break;
-//		case ProjectileType.GRENADE:
-//			rigidbody.AddForce (direction * speed, ForceMode.Impulse);
-//			break;
-//		case ProjectileType.ORB:
-//			rigidbody.AddForce (direction * speed, ForceMode.VelocityChange);
-//			break;
-//		}
-//	}
-
 	
 	//RPC Helper: Setup the initial variables for the projectile
 	public void InitVariables (Vector3 givenDirection, int teamNum) { 
 		networkView.RPC ("SetVariables", RPCMode.AllBuffered, givenDirection, teamNum);
 	}
-
-//	//RPC Helper: Setup the initial variables for the projectile
-//	public void InitDirection (Vector3 givenDirection) { 
-//		networkView.RPC ("SetDirection", RPCMode.AllBuffered, givenDirection);
-//	}
-
-
+	
 	//Initialized its own vatiables locally when instantiated
 	void Awake () {
 		projectParticles.Play (); //Play normal particles
@@ -92,7 +81,7 @@ public class Projectile : MonoBehaviour {
 	#endregion
 
 
-	//State synchronize
+	//State synchronize function, synchronize the position, velocity and particle info
 	void OnSerializeNetworkView(BitStream stream, NetworkMessageInfo info) {
 		bool hasHit = false;
 		Vector3 position = Vector3.zero;
@@ -140,14 +129,13 @@ public class Projectile : MonoBehaviour {
 		}
 	}
 
-
-
+	
 	// Update is called once per frame
 	void Update () {
-		if (!networkView.isMine) { //This is here because network.destroy can only be called once
+		if (!networkView.isMine) { //This function is for server only
 			return;
 		}
-		//If the projectile hit something and the explosion animation stopped, destoy the projectile
+		//If the projectile hit something, deals damage to the damage recievers
 		if (isHit == true && damageDealt == false) {
 			foreach (GameObject dr in damageReceivers) {
 				if (dr != null) {
@@ -159,53 +147,59 @@ public class Projectile : MonoBehaviour {
 			}
 			damageDealt = true;
 		}
-		//Destroy the projectile after it has it and its hit animation has finished
-		if (isHit == true && !hitParticles.isPlaying) {
+		//Destroy the projectile after it has hit, its hit animation has finished and damages dealt
+		if (isHit == true && !hitParticles.isPlaying && damageDealt) {
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
 		}
-		//If the projectile did not hit anything, but it has outlived its lifetime
+		//If the projectile did not hit anything, but it has outlived its lifetime, destroy it and deals splash damage
 		else if (isHit != true && timeAlive > lifeTime) {
 			foreach (GameObject dr in damageReceivers) {
-				HealthManager hpManager = dr.GetComponent<HealthManager>();
-				if (hpManager != null) {
-					hpManager.ReceiveDamage (damageAmount, damageType, damageElement);
+				if (dr!= null) {
+					HealthManager hpManager = dr.GetComponent<HealthManager>();
+					if (hpManager != null) {
+						hpManager.ReceiveDamage (damageAmount, damageType, damageElement);
+					}
 				}
 			}
 			Network.RemoveRPCs (networkView.viewID);
 			Network.Destroy (gameObject);
 		}
-		//Check if the projectiles has hit anything
+		//If the projectile is still live, check whether it has targetted anything
 		else {
-			//networkView.RPC ("DetectCollision", RPCMode.AllBuffered);
 			DetectCollision ();
 		}
 	}
 	
 
-	[RPC]
-	//RPC call that detect collisions
+	/*The update function that check whether the projectile has hit anything, every
+	 kind of projectiles have different behaviors*/
 	void DetectCollision () {
 		switch (projectileType) {
+		//Bullets explode on contact, but affect only the contacted object
 		case ProjectileType.BULLET:
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
+				//Bullets hit anything except itself and friendlies
 				if (!isHit && hitInfo.collider != this.collider &&
 				    hitInfo.tag != "Projectiles" &&
 				    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
 				     (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
 					isHit = true;
-					rigidbody.isKinematic = true;
-					rigidbody.detectCollisions = false;
-					projectParticles.Stop ();
-					hitParticles.Play ();
-					GetComponent<Collider>().isTrigger = true;
-					GetComponent<MeshRenderer>().enabled = false;
-					if ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+					rigidbody.isKinematic = true; //Stop rigidbody from functioning
+					rigidbody.detectCollisions = false; //Stop rigidbody from detecting collisions
+					projectParticles.Stop (); //Stop the normal particles
+					hitParticles.Play (); //Start the explosion particles
+					GetComponent<Collider>().isTrigger = true; //Turn off the collider
+					GetComponent<MeshRenderer>().enabled = false; //Turn off the mesh
+					//If the contacted object is not on the same team, damage it
+					if (hitInfo.GetComponent <HealthManager>() != null &&
+						(teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
 					    (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2")) {
 						damageReceivers.Add (hitInfo.gameObject);
 					}
 				}
 			}
+			//If the projectile hasn't hit anything, increase timer and update particles
 			if (!isHit) {
 				timeAlive += Time.deltaTime;
 				//Debug: change the direction of the particles ----------------------------
@@ -224,6 +218,7 @@ public class Projectile : MonoBehaviour {
 				//---------------------------------
 			}
 			break;
+		//Grenades explode only when contacting the enemie, or when timer expires
 		case ProjectileType.GRENADE:
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (!isHit && hitInfo.collider != this.collider &&
@@ -241,18 +236,21 @@ public class Projectile : MonoBehaviour {
 					GetComponent<MeshRenderer>().enabled = false;
 				}
 			}
-			if (isHit) {
-				damageReceivers.Clear();
-				foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, splashDamageRange)) {
-					if (hitInfo.gameObject.GetComponent<HealthManager>() != null &&
-					    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
-					     (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
-						damageReceivers.Add (hitInfo.gameObject);
-					}
+
+			//Update the list of damage receivers regardless of isHit, since grenade can explode at anytime
+			damageReceivers.Clear();
+			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, splashDamageRange)) {
+				if (hitInfo.gameObject.GetComponent<HealthManager>() != null &&
+				    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+				     (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
+					damageReceivers.Add (hitInfo.gameObject);
 				}
 			}
+
+			//If the projectile hasn't hit anything, increase timer and update the particles
 			if (!isHit) {
 				timeAlive += Time.deltaTime;
+
 				//Debug: change the direction of the particles----------------------------
 				ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
 				int numOfParticles = projectParticles.GetParticles (particles);
@@ -267,18 +265,22 @@ public class Projectile : MonoBehaviour {
 				}
 				projectParticles.SetParticles (particles, numOfParticles);
 				//---------------------------------
-			}
-			if (!isHit && timeAlive > lifeTime) {
-				isHit = true;
-				rigidbody.isKinematic = true;
-				rigidbody.detectCollisions = false;
-				projectParticles.Stop ();
-				hitParticles.Play ();
-				GetComponent<Collider>().isTrigger = true;
-				GetComponent<MeshRenderer>().enabled = false;
+			
+				//If the timer expires, the grenade explodes
+				if (timeAlive > lifeTime) {
+					isHit = true;
+					rigidbody.isKinematic = true;
+					rigidbody.detectCollisions = false;
+					projectParticles.Stop ();
+					hitParticles.Play ();
+					GetComponent<Collider>().isTrigger = true;
+					GetComponent<MeshRenderer>().enabled = false;
+				}
 			}
 			break;
+		//Orb travels at slower speed, but cause high splash damage
 		case ProjectileType.ORB:
+			//Orb only connects with anything except itself and friendlies
 			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, GetComponent<SphereCollider>().radius+0.1f)) {
 				if (!isHit && hitInfo.collider != this.collider &&
 				    hitInfo.tag != "Projectiles" && 
@@ -293,16 +295,18 @@ public class Projectile : MonoBehaviour {
 					GetComponent<MeshRenderer>().enabled = false;
 				}
 			}
-			if (isHit) {
-				damageReceivers.Clear();
-				foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, splashDamageRange)) {
-					if (hitInfo.gameObject.GetComponent<HealthManager>() != null &&
-					    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
-					 	 (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
-						damageReceivers.Add (hitInfo.gameObject);
-					}
+
+			//Calculate the potential targets that are within range
+			damageReceivers.Clear();
+			foreach (Collider hitInfo in Physics.OverlapSphere (transform.position, splashDamageRange)) {
+				if (hitInfo.gameObject.GetComponent<HealthManager>() != null &&
+				    ((teamNumber == TeamNumber.TEAM_ONE && hitInfo.tag != "Team 1") ||
+				 	 (teamNumber == TeamNumber.TEAM_TWO && hitInfo.tag != "Team 2"))) {
+					damageReceivers.Add (hitInfo.gameObject);
 				}
 			}
+
+			//If the projectile hasn't hit anything, increase timer and update projectiles
 			if (!isHit) {
 				timeAlive += Time.deltaTime;
 				//Debug: change the direction of the particles----------------------------

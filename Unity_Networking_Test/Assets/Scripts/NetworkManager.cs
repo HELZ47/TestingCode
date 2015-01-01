@@ -120,7 +120,7 @@ public class NetworkManager : MonoBehaviour {
 	//If the client is disconnected from the server, load back to the main menu
 	void OnDisconnectedFromServer(NetworkDisconnection info) {
 		print (info.ToString());
-		Application.LoadLevel (menuLevelName);
+		Application.LoadLevel (menuLevelName); //This is what caused startServer -> refreshHlist to duplicate network manager
 	}
 	
 	//IF a player is disconnected, clean up after than player by removing its RPCs and distroy its objects
