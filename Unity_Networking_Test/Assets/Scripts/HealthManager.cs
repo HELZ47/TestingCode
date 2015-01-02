@@ -8,7 +8,7 @@ public class HealthManager : MonoBehaviour {
 	public enum StatusEffect { NORMAL, CONFUSED, BURNED, FROZE, SHOCKED, SLOWED, OTHER };
 	//Adjustable
 	public float hitPoints;
-	public float armourValue;
+	public float armorValue, statusRes;
 	//Not adjustable
 	[HideInInspector]
 	public StatusEffect statusEffect;
@@ -53,6 +53,7 @@ public class HealthManager : MonoBehaviour {
 	public void ReceiveDamage (float damageAmount, Projectile.DamageType damageType, Projectile.DamageElement damageElement) {
 		//The server performs the calculation then synchronize it with everyone else through RPC
 		if (Network.isServer) {
+			//if (damageAmount - armorValue > 
 			hitPoints -= damageAmount; //This is the most basic algorithm, not account for armor and whatnot
 			networkView.RPC ("UpdateHP", RPCMode.AllBuffered, hitPoints);
 		}
