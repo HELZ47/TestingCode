@@ -66,6 +66,7 @@ public class BotMovement : MonoBehaviour {
 			//Detect the closest target within range
 			foreach (Collider col in nColliders) {
 				if (col.GetComponent<HealthManager>() != null &&
+				    !col.GetComponent<HealthManager>().isDead &&
 					((tag == "Team 1" && col.tag != "Team 1") || 
 				     (tag == "Team 2" && col.tag != "Team 2"))) {
 					if (Vector3.Distance (transform.position, col.transform.position) < closestEnemyDistance) {

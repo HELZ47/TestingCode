@@ -65,14 +65,17 @@ public class BotAttack : MonoBehaviour {
 		    myBotManager.hasAttackedThisAnimation == false) {
 			myBotManager.isAttacking = false;
 			myBotManager.hasAttackedThisAnimation = true;
-			if (myBotManager.damageType == Projectile.DamageType.DIRECT) {
-				Vector3 startPosition = myBotManager.projectileStartMarker.transform.position;
-				Vector3 direction = (myBotManager.TargetTransform.position - startPosition).normalized;
-				direction.y = 0f;
-				CreateProjectile ("Prefabs/Lightning_Bullet", startPosition, new Quaternion(), direction);
-			}
-			else if (myBotManager.damageType == Projectile.DamageType.MELEE) {
-				myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>().ReceiveDamage (myBotManager.damageAmount, myBotManager.damageType, myBotManager.damageElement);
+			if (myBotManager.TargetTransform != null &&
+			    !myBotManager.TargetTransform.GetComponent <HealthManager>().isDead) {
+				if (myBotManager.damageType == Projectile.DamageType.DIRECT) {
+					Vector3 startPosition = myBotManager.projectileStartMarker.transform.position;
+					Vector3 direction = (myBotManager.TargetTransform.position - startPosition).normalized;
+					direction.y = 0f;
+					CreateProjectile ("Prefabs/Lightning_Bullet", startPosition, new Quaternion(), direction);
+				}
+				else if (myBotManager.damageType == Projectile.DamageType.MELEE) {
+					myBotManager.TargetTransform.gameObject.GetComponent<HealthManager>().ReceiveDamage (myBotManager.damageAmount, myBotManager.damageType, myBotManager.damageElement);
+				}
 			}
 		}
 		//If the bot has dealt damage, reset the flag on next attack

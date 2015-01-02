@@ -18,6 +18,7 @@ public class SpawnMob : MonoBehaviour {
 	public int numOfSpawns;
 	public Waypoints path;
 	public Vector2 worldSize;
+	[HideInInspector]
 	public List<Vector3> spawnPositions;
 	float spawnTimer;
 

@@ -17,13 +17,13 @@ public class BotManager : MonoBehaviour {
 	public GameObject projectileStartMarker;
 	public Waypoints givenPath;
 	//Not Adjustable
-	[HideInInspector]
+	//[HideInInspector]
 	public bool targetAquired, VIPFound, isAttacking, hasAttackedThisAnimation;
-	[HideInInspector]
+	//[HideInInspector]
 	public Transform VIPTransform;
-	[HideInInspector]
+	//[HideInInspector]
 	public Transform TargetTransform;
-	[HideInInspector]
+	//[HideInInspector]
 	public float timerBetweenAttacks;
 	NavMeshAgent myNavMeshAgent;
 	BotAnimator myBotAnimator;
