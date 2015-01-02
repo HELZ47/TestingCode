@@ -4,16 +4,19 @@ using System.Collections;
 //Manage health and damage receiving calculations
 public class HealthManager : MonoBehaviour {
 
-	//Fields
-
+	#region Fields
+	public enum StatusEffect { NORMAL, CONFUSED, BURNED, FROZE, SHOCKED, SLOWED, OTHER };
 	//Adjustable
 	public float hitPoints;
 	public float armourValue;
-
 	//Not adjustable
 	[HideInInspector]
+	public StatusEffect statusEffect;
+	[HideInInspector]
 	public bool isTakingDamage, isDead, deathAnimationFinished;
+	[HideInInspector]
 	public float fullHPAmount;
+	#endregion
 
 
 	//Initialize internal variables
