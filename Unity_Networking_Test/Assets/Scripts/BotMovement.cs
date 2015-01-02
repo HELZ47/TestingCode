@@ -123,7 +123,7 @@ public class BotMovement : MonoBehaviour {
 				}
 			}
 			//If there is a target, move in until it's in the fire range
-			else if (myBotManager.targetAquired) {
+			else if (myBotManager.targetAquired && myBotManager.TargetTransform != null) {
 				if (Vector3.Distance(transform.position, myBotManager.TargetTransform.position) < myBotManager.attackingRange) {
 					if (rbEnabled) {
 						rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);

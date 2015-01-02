@@ -40,6 +40,7 @@ public class BotManager : MonoBehaviour {
 
 	#region State Synchronization function
 	//State Sync function
+	//Although the real calculations are done with navmesh agent, the clients are using rb to navigate
 	void OnSerializeNetworkView(BitStream stream, NetworkMessageInfo info) {
 		bool rbEnabled = false;
 		Vector3 position = Vector3.zero;
@@ -61,7 +62,7 @@ public class BotManager : MonoBehaviour {
 			takingDamageAnim = myBotAnimator.takingDamage;
 			isDeadAnim = myBotAnimator.isDead;
 			isAttackingAnim = myBotAnimator.isAttacking;
-			stream.Serialize(ref rbEnabled);
+			//stream.Serialize(ref rbEnabled);
 			stream.Serialize(ref position);
 			stream.Serialize(ref forwardDir);
 			stream.Serialize(ref velocity);
@@ -71,7 +72,7 @@ public class BotManager : MonoBehaviour {
 			stream.Serialize(ref isAttackingAnim);
 		} 
 		else {
-			stream.Serialize(ref rbEnabled);
+			//stream.Serialize(ref rbEnabled);
 			stream.Serialize(ref position);
 			stream.Serialize(ref forwardDir);
 			stream.Serialize(ref velocity);
@@ -81,15 +82,15 @@ public class BotManager : MonoBehaviour {
 			stream.Serialize(ref isAttackingAnim);
 			transform.position = position;
 			transform.forward = forwardDir;
-			if (rbEnabled) {
+			//if (rbEnabled) {
 				rigidbody.isKinematic = false;
 				rigidbody.velocity = velocity;
 				myNavMeshAgent.Stop ();
-			}
-			else {
-				rigidbody.isKinematic = true;
-				myNavMeshAgent.velocity = velocity;
-			}
+//			}
+//			else {
+//				rigidbody.isKinematic = true;
+//				myNavMeshAgent.velocity = velocity;
+//			}
 			myAnimator.SetBool ("isMoving", isMovingAnim);
 			myAnimator.SetBool ("takingDamage", takingDamageAnim);
 			myAnimator.SetBool ("isDead", isDeadAnim);
