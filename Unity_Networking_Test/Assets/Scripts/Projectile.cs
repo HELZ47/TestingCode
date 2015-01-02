@@ -81,6 +81,7 @@ public class Projectile : MonoBehaviour {
 	#endregion
 
 
+	#region State Synchronization function
 	//State synchronize function, synchronize the position, velocity and particle info
 	void OnSerializeNetworkView(BitStream stream, NetworkMessageInfo info) {
 		bool hasHit = false;
@@ -128,6 +129,7 @@ public class Projectile : MonoBehaviour {
 			}
 		}
 	}
+	#endregion
 
 	
 	// Update is called once per frame

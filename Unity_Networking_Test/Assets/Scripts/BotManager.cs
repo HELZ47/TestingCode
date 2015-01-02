@@ -3,11 +3,12 @@ using System.Collections;
 
 public class BotManager : MonoBehaviour {
 
-	//Fields
-
+	#region Fields
+	public enum BotType { NORMAL, BODYGUARD };
+	public enum BodyGuardType { GENERAL, SPECIFIC };
 	//Adjustable
-	public enum BotType { GENERAL_BODY_GUARD, SPECIFIC_BODY_GUARD, PATROL };
 	public BotType botType;
+	public BodyGuardType bodyguardType;
 	public float damageAmount;
 	public float timeBetweenAttacksInSeconds;
 	public Projectile.DamageElement damageElement;
@@ -15,15 +16,20 @@ public class BotManager : MonoBehaviour {
 	public float enemyDetectionRange, VIPDetectionRange, movementSpeed, acceleration, stoppingRange, attackingRange;
 	public GameObject projectileStartMarker;
 	public Waypoints givenPath;
-
 	//Not Adjustable
+	[HideInInspector]
 	public bool targetAquired, VIPFound, isAttacking, hasAttackedThisAnimation;
+	[HideInInspector]
 	public Transform VIPTransform;
+	[HideInInspector]
 	public Transform TargetTransform;
+	[HideInInspector]
 	public float timerBetweenAttacks;
 	NavMeshAgent myNavMeshAgent;
 	BotAnimator myBotAnimator;
 	Animator myAnimator;
+	#endregion
+
 
 	//Instantiate local variables
 	void Awake () {
@@ -32,7 +38,7 @@ public class BotManager : MonoBehaviour {
 		myAnimator = GetComponent<Animator> ();
 	}
 
-
+	#region State Synchronization function
 	//State Sync function
 	void OnSerializeNetworkView(BitStream stream, NetworkMessageInfo info) {
 		bool rbEnabled = false;
@@ -90,17 +96,6 @@ public class BotManager : MonoBehaviour {
 			myAnimator.SetBool ("isAttacking", isAttackingAnim);
 		}
 	}
+	#endregion
 
-
-	// Update is called once per frame
-	void Update () {
-		if (networkView.isMine) {
-			if (/*isAttacking &&*/ GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
-				timerBetweenAttacks = 0f;
-			}
-			else {
-				timerBetweenAttacks += Time.deltaTime;
-			}
-		}
-	}
 }

@@ -1,15 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//Handles the bot's animation states and transitions
 public class BotAnimator : MonoBehaviour {
 
-	//Fields
+	#region Fields
+	[HideInInspector]
+	public bool isMoving, takingDamage, isDead, isAttacking;
 	Animator myAnimator;
 	BotManager myBotManager;
 	HealthManager myHealthManager;
-	public bool isMoving, takingDamage, isDead, isAttacking;
 	NavMeshAgent myNavMeshAgent;
 	bool rbEnabled;
+	#endregion
+
 
 	// Use this for initialization
 	void Awake () {
@@ -19,13 +23,13 @@ public class BotAnimator : MonoBehaviour {
 		myNavMeshAgent = GetComponent<NavMeshAgent> ();
 	}
 
-	[RPC]
-	void UpdateAnimation (bool isMoving, bool takingDamage, bool isDead, bool isAttacking) {
-		myAnimator.SetBool ("isMoving", isMoving);
-		myAnimator.SetBool ("takingDamage", takingDamage);
-		myAnimator.SetBool ("isDead", isDead);
-		myAnimator.SetBool ("isAttacking", isAttacking);
-	}
+//	[RPC]
+//	void UpdateAnimation (bool isMoving, bool takingDamage, bool isDead, bool isAttacking) {
+//		myAnimator.SetBool ("isMoving", isMoving);
+//		myAnimator.SetBool ("takingDamage", takingDamage);
+//		myAnimator.SetBool ("isDead", isDead);
+//		myAnimator.SetBool ("isAttacking", isAttacking);
+//	}
 
 	// Update is called once per frame
 	void Update () {
@@ -57,8 +61,7 @@ public class BotAnimator : MonoBehaviour {
 
 			//Attacking animation
 			if (myBotManager.isAttacking &&
-			    !myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack") &&
-			    myBotManager.timerBetweenAttacks >= myBotManager.timeBetweenAttacksInSeconds) {
+			    !myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack")) {
 				myAnimator.SetBool ("isAttacking", true);
 				isAttacking = true;
 			}
@@ -92,9 +95,6 @@ public class BotAnimator : MonoBehaviour {
 //			}
 			takingDamage = false;
 			//networkView.RPC("UpdateAnimation", RPCMode.All, isMoving, takingDamage, isDead, isAttacking);
-		}
-		else {
-
 		}
 	}
 }

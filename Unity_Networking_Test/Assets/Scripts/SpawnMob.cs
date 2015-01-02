@@ -8,7 +8,7 @@ public class SpawnMob : MonoBehaviour {
 	public enum SpawnType { ZOMBIE, ROBOT, ROBOT_RANGED, TOWER, TEST };
 	public enum SpawnNumber { SINGLE, AREA };
 	public enum TeamNumber { ONE, TWO, OTHER };
-	public enum RobotType { ASSAULT, BODYGUARD };
+	public enum RobotType { NORMAL, BODYGUARD };
 	public SpawnType spawnType;
 	public SpawnNumber spawnNumber;
 	public TeamNumber teamNumber;
@@ -37,8 +37,8 @@ public class SpawnMob : MonoBehaviour {
 						else if (teamNumber == TeamNumber.TWO) {
 							robot = Network.Instantiate (Resources.Load ("Prefabs/Robots/Robot_T2"), transform.position, new Quaternion(), 0) as GameObject;
 						}
-						if (robotType == RobotType.ASSAULT) {
-							robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+						if (robotType == RobotType.NORMAL) {
+							robot.GetComponent<BotManager>().botType = BotManager.BotType.NORMAL;
 							robot.GetComponent<BotManager>().givenPath = path;
 						}
 						break;
@@ -60,8 +60,8 @@ public class SpawnMob : MonoBehaviour {
 						else if (teamNumber == TeamNumber.TWO) {
 							robot = Network.Instantiate (Resources.Load ("Prefabs/Robots/RangedRobot_T2"), transform.position, new Quaternion(), 0) as GameObject;
 						}
-						if (robotType == RobotType.ASSAULT) {
-							robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+						if (robotType == RobotType.NORMAL) {
+							robot.GetComponent<BotManager>().botType = BotManager.BotType.NORMAL;
 							robot.GetComponent<BotManager>().givenPath = path;
 						}
 						break;
@@ -101,8 +101,8 @@ public class SpawnMob : MonoBehaviour {
 							else if (teamNumber == TeamNumber.TWO) {
 								robot = Network.Instantiate (Resources.Load ("Prefabs/Robots/Robot_T2"), spawnPosition, new Quaternion(), 0) as GameObject;
 							}
-							if (robotType == RobotType.ASSAULT) {
-								robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+							if (robotType == RobotType.NORMAL) {
+								robot.GetComponent<BotManager>().botType = BotManager.BotType.NORMAL;
 								robot.GetComponent<BotManager>().givenPath = path;
 							}
 							break;
@@ -124,8 +124,8 @@ public class SpawnMob : MonoBehaviour {
 							else if (teamNumber == TeamNumber.TWO) {
 								robot = Network.Instantiate (Resources.Load ("Prefabs/Robots/RangedRobot_T2"), spawnPosition, new Quaternion(), 0) as GameObject;
 							}
-							if (robotType == RobotType.ASSAULT) {
-								robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+							if (robotType == RobotType.NORMAL) {
+								robot.GetComponent<BotManager>().botType = BotManager.BotType.NORMAL;
 								robot.GetComponent<BotManager>().givenPath = path;
 							}
 							break;
@@ -156,8 +156,8 @@ public class SpawnMob : MonoBehaviour {
 					else if (teamNumber == TeamNumber.TWO) {
 						robot = Network.Instantiate (Resources.Load ("Prefabs/Robots/Robot_T2"), transform.position, new Quaternion(), 0) as GameObject;
 					}
-					if (robotType == RobotType.ASSAULT) {
-						robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+					if (robotType == RobotType.NORMAL) {
+						robot.GetComponent<BotManager>().botType = BotManager.BotType.NORMAL;
 						robot.GetComponent<BotManager>().givenPath = path;
 					}
 					break;
@@ -179,8 +179,8 @@ public class SpawnMob : MonoBehaviour {
 					else if (teamNumber == TeamNumber.TWO) {
 						robot = Network.Instantiate (Resources.Load ("Prefabs/Robots/RangedRobot_T2"), transform.position, new Quaternion(), 0) as GameObject;
 					}
-					if (robotType == RobotType.ASSAULT) {
-						robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+					if (robotType == RobotType.NORMAL) {
+						robot.GetComponent<BotManager>().botType = BotManager.BotType.NORMAL;
 						robot.GetComponent<BotManager>().givenPath = path;
 					}
 					break;
@@ -220,8 +220,8 @@ public class SpawnMob : MonoBehaviour {
 						else if (teamNumber == TeamNumber.TWO) {
 							robot = Network.Instantiate (Resources.Load ("Prefabs/Robots/Robot_T2"), spawnPosition, new Quaternion(), 0) as GameObject;
 						}
-						if (robotType == RobotType.ASSAULT) {
-							robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+						if (robotType == RobotType.NORMAL) {
+							robot.GetComponent<BotManager>().botType = BotManager.BotType.NORMAL;
 							robot.GetComponent<BotManager>().givenPath = path;
 						}
 						break;
@@ -243,8 +243,8 @@ public class SpawnMob : MonoBehaviour {
 						else if (teamNumber == TeamNumber.TWO) {
 							robot = Network.Instantiate (Resources.Load ("Prefabs/Robots/RangedRobot_T2"), spawnPosition, new Quaternion(), 0) as GameObject;
 						}
-						if (robotType == RobotType.ASSAULT) {
-							robot.GetComponent<BotManager>().botType = BotManager.BotType.PATROL;
+						if (robotType == RobotType.NORMAL) {
+							robot.GetComponent<BotManager>().botType = BotManager.BotType.NORMAL;
 							robot.GetComponent<BotManager>().givenPath = path;
 						}
 						break;
