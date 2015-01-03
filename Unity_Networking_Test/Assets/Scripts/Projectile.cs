@@ -8,8 +8,8 @@ public class Projectile : MonoBehaviour {
 	#region Fields
 	//Public Types as ENUMs
 	public enum ProjectileType { BULLET, GRENADE, ORB }
-	public enum DamageElement { PHYSICAL, FIRE, WATER, ICE, ELECTRIC, SMOKE };
-	public enum DamageType { DIRECT, SPLASH, MELEE }
+	public enum DamageElement { PHYSICAL, FIRE, WATER, ICE, ELECTRIC, SMOKE, STATUS };
+	public enum DamageType { DIRECT, SPLASH, MELEE, STATUS }
 	public enum TeamNumber { TEAM_ONE, TEAM_TWO, OTHER }
 	//Adjustable
 	public ProjectileType projectileType;

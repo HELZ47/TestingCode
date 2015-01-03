@@ -9,17 +9,27 @@ public class BotStatusManager : MonoBehaviour {
 	//Not Adjustable
 	BotManager myBotManager;
 	HealthManager myHPManager;
-	float healthEffectTimer;
+	float healthEffectTimer, gradualDamageTimer;
 	HealthManager.StatusEffect prevStatus;
+	float initSpeed, initAcceleration, initFireRate;
 	#endregion
 
 
+	#region Initalization
 	// Use this for initialization
 	void Awake () {
 		myBotManager = GetComponent<BotManager> ();
 		myHPManager = GetComponent<HealthManager> ();
 		healthEffectTimer = 0f;
 	}
+
+	//Initialize external variables
+	void Start () {
+		initSpeed = myBotManager.movementSpeed;
+		initAcceleration = myBotManager.acceleration;
+		initFireRate = myBotManager.timeBetweenAttacksInSeconds;
+	}
+	#endregion
 
 
 	//RPC call that plays a certain particle effect that reflect on the status
@@ -48,6 +58,7 @@ public class BotStatusManager : MonoBehaviour {
 		//If the status effect has changed since last update, reset the timer
 		if (myHPManager.statusEffect != prevStatus) {
 			healthEffectTimer = 0f;
+			gradualDamageTimer = 0f;
 		}
 
 		switch (myHPManager.statusEffect) {
@@ -58,6 +69,7 @@ public class BotStatusManager : MonoBehaviour {
 			myBotManager.slowedP.Stop ();
 			myBotManager.confusedP.Stop ();
 			healthEffectTimer = 0f;
+			gradualDamageTimer = 0f;
 			break;
 		case HealthManager.StatusEffect.BURNED:
 			myBotManager.burnedP.Play ();
@@ -68,10 +80,38 @@ public class BotStatusManager : MonoBehaviour {
 			if (healthEffectTimer > 3f) {
 				myHPManager.statusEffect = HealthManager.StatusEffect.NORMAL;
 				healthEffectTimer = 0f;
+				gradualDamageTimer = 0f;
 			}
 			else {
+				gradualDamageTimer += Time.deltaTime;
+				if (gradualDamageTimer > 0.5f) {
+					gradualDamageTimer = 0f;
+					myHPManager.ReceiveDamage (10, Projectile.DamageType.STATUS, Projectile.DamageElement.STATUS);
+				}
 				healthEffectTimer += Time.deltaTime;
 			}
+			break;
+		case HealthManager.StatusEffect.CONFUSED:
+			myBotManager.burnedP.Stop ();
+			myBotManager.frozenP.Stop ();
+			myBotManager.shockedP.Stop ();
+			myBotManager.slowedP.Stop ();
+			myBotManager.confusedP.Play ();
+
+			if (healthEffectTimer > 3f) {
+				myHPManager.statusEffect = HealthManager.StatusEffect.NORMAL;
+				myBotManager.movementSpeed = initSpeed;
+				myBotManager.acceleration = initAcceleration;
+				myBotManager.timeBetweenAttacksInSeconds = initFireRate;
+				healthEffectTimer = 0f;
+			}
+			else {
+				myBotManager.movementSpeed = 0f;
+				myBotManager.acceleration = 0f;
+				myBotManager.timeBetweenAttacksInSeconds = 999f;
+				healthEffectTimer += Time.deltaTime;
+			}
+
 			break;
 		}
 

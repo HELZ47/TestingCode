@@ -61,13 +61,23 @@ public class HealthManager : MonoBehaviour {
 	public void ReceiveDamage (float damageAmount, Projectile.DamageType damageType, Projectile.DamageElement damageElement) {
 		//The server performs the calculation then synchronize it with everyone else through RPC
 		if (Network.isServer) {
-			//if (damageAmount - armorValue > 
+			//Update the HP and sync it with the clients
 			hitPoints -= damageAmount; //This is the most basic algorithm, not account for armor and whatnot
 			networkView.RPC ("UpdateHP", RPCMode.AllBuffered, hitPoints);
-			if (damageElement == Projectile.DamageElement.FIRE) {
-				print ("Burned!");
+
+			//Update the status effect and sync it with the clients
+			switch (damageElement) {
+			case Projectile.DamageElement.FIRE:
 				statusEffect = StatusEffect.BURNED;
+				break;
+			case Projectile.DamageElement.SMOKE:
+				statusEffect = StatusEffect.CONFUSED;
+				break;
 			}
+//			if (damageElement == Projectile.DamageElement.FIRE) {
+//				print ("Burned!");
+//				statusEffect = StatusEffect.BURNED;
+//			}
 			//networkView.RPC ("UpdateStatusEffect", RPCMode.AllBuffered, (int)statusEffect);
 		}
 	}
