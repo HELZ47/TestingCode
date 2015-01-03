@@ -15,19 +15,22 @@ public class BotManager : MonoBehaviour {
 	public Projectile.DamageType damageType;
 	public float enemyDetectionRange, VIPDetectionRange, movementSpeed, acceleration, stoppingRange, attackingRange;
 	public GameObject projectileStartMarker;
-	public Waypoints givenPath;
+	public ParticleSystem burnedP, frozenP, shockedP, slowedP, confusedP;
 	//Not Adjustable
-	//[HideInInspector]
+	[HideInInspector]
+	public Waypoints givenPath;
+	[HideInInspector]
 	public bool targetAquired, VIPFound, isAttacking, hasAttackedThisAnimation;
-	//[HideInInspector]
+	[HideInInspector]
 	public Transform VIPTransform;
-	//[HideInInspector]
+	[HideInInspector]
 	public Transform TargetTransform;
-	//[HideInInspector]
+	[HideInInspector]
 	public float timerBetweenAttacks;
 	NavMeshAgent myNavMeshAgent;
 	BotAnimator myBotAnimator;
 	Animator myAnimator;
+	HealthManager myHPManager;
 	#endregion
 
 
@@ -36,6 +39,12 @@ public class BotManager : MonoBehaviour {
 		myNavMeshAgent = GetComponent<NavMeshAgent> ();
 		myBotAnimator = GetComponent<BotAnimator> ();
 		myAnimator = GetComponent<Animator> ();
+		myHPManager = GetComponent<HealthManager> ();
+		burnedP.Stop ();
+		frozenP.Stop ();
+		shockedP.Stop ();
+		slowedP.Stop ();
+		confusedP.Stop ();
 	}
 
 	#region State Synchronization function
@@ -48,6 +57,7 @@ public class BotManager : MonoBehaviour {
 		Vector3 velocity = Vector3.zero;
 		Vector3 nmDestination = Vector3.zero;
 		bool isMovingAnim = false, takingDamageAnim = false, isDeadAnim = false, isAttackingAnim = false;
+		int status = 99;
 		if (stream.isWriting) {
 			rbEnabled = !rigidbody.isKinematic;
 			position = transform.position;
@@ -62,6 +72,7 @@ public class BotManager : MonoBehaviour {
 			takingDamageAnim = myBotAnimator.takingDamage;
 			isDeadAnim = myBotAnimator.isDead;
 			isAttackingAnim = myBotAnimator.isAttacking;
+			status = (int)myHPManager.statusEffect;
 			//stream.Serialize(ref rbEnabled);
 			stream.Serialize(ref position);
 			stream.Serialize(ref forwardDir);
@@ -70,6 +81,7 @@ public class BotManager : MonoBehaviour {
 			stream.Serialize(ref takingDamageAnim);
 			stream.Serialize(ref isDeadAnim);
 			stream.Serialize(ref isAttackingAnim);
+			stream.Serialize(ref status);
 		} 
 		else {
 			//stream.Serialize(ref rbEnabled);
@@ -80,6 +92,7 @@ public class BotManager : MonoBehaviour {
 			stream.Serialize(ref takingDamageAnim);
 			stream.Serialize(ref isDeadAnim);
 			stream.Serialize(ref isAttackingAnim);
+			stream.Serialize(ref status);
 			transform.position = position;
 			transform.forward = forwardDir;
 			//if (rbEnabled) {
@@ -95,6 +108,20 @@ public class BotManager : MonoBehaviour {
 			myAnimator.SetBool ("takingDamage", takingDamageAnim);
 			myAnimator.SetBool ("isDead", isDeadAnim);
 			myAnimator.SetBool ("isAttacking", isAttackingAnim);
+			HealthManager.StatusEffect prevEffect = myHPManager.statusEffect;
+			myHPManager.statusEffect = (HealthManager.StatusEffect)status;
+			if (prevEffect != myHPManager.statusEffect) {
+				burnedP.Stop ();
+				frozenP.Stop ();
+				shockedP.Stop ();
+				slowedP.Stop ();
+				confusedP.Stop ();
+				switch (myHPManager.statusEffect) {
+				case HealthManager.StatusEffect.BURNED:
+					burnedP.Play();
+					break;
+				}
+			}
 		}
 	}
 	#endregion

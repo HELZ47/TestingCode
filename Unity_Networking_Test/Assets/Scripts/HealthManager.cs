@@ -10,7 +10,7 @@ public class HealthManager : MonoBehaviour {
 	public float hitPoints;
 	public float armorValue, statusRes;
 	//Not adjustable
-	[HideInInspector]
+	//[HideInInspector]
 	public StatusEffect statusEffect;
 	[HideInInspector]
 	public bool isTakingDamage, isDead, deathAnimationFinished;
@@ -22,6 +22,7 @@ public class HealthManager : MonoBehaviour {
 	//Initialize internal variables
 	void Awake () {
 		fullHPAmount = hitPoints;
+		statusEffect = StatusEffect.NORMAL;
 	}
 
 
@@ -49,6 +50,13 @@ public class HealthManager : MonoBehaviour {
 	}
 
 
+	//Update the status effect of the objects
+	[RPC]
+	void UpdateStatusEffect (int status) {
+		statusEffect = (StatusEffect)status;
+	}
+
+
 	//Receives the dealt damage and perform calculations on how much of it is really going to affect the HP
 	public void ReceiveDamage (float damageAmount, Projectile.DamageType damageType, Projectile.DamageElement damageElement) {
 		//The server performs the calculation then synchronize it with everyone else through RPC
@@ -56,6 +64,11 @@ public class HealthManager : MonoBehaviour {
 			//if (damageAmount - armorValue > 
 			hitPoints -= damageAmount; //This is the most basic algorithm, not account for armor and whatnot
 			networkView.RPC ("UpdateHP", RPCMode.AllBuffered, hitPoints);
+			if (damageElement == Projectile.DamageElement.FIRE) {
+				print ("Burned!");
+				statusEffect = StatusEffect.BURNED;
+			}
+			//networkView.RPC ("UpdateStatusEffect", RPCMode.AllBuffered, (int)statusEffect);
 		}
 	}
 }
