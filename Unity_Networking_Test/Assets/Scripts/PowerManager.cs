@@ -39,7 +39,7 @@ public class PowerManager : MonoBehaviour {
 		}
 		//--------------------------------------------------------------------------------------
 
-		if ((activatePower || Input.GetKeyDown(KeyCode.LeftControl)) && 
+		if ((activatePower || Input.GetKeyDown(KeyCode.LeftShift)) && 
 		    playerManager.powerState == PlayerManager.PowerState.Normal &&
 		    (rigidbody.velocity - new Vector3(0, rigidbody.velocity.y, 0)).magnitude > 1.5f) {
 			//print ("Power Up");

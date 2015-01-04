@@ -3,19 +3,35 @@ using System.Collections;
 
 public class MovementController : MonoBehaviour {
 
-	//Fields
-	public Camera mainCamera;
+	#region Fields
+	//Adjustable
 	public Transform playerTransform;
 	public float maxWalkingSpeed, maxRunningSpeed, maxMidAirSpeed;
 	public float walkingAcceleration, runningAcceleration, jumpImpulse, midAirAcceleration;
+	//Not Adjustable
+	[HideInInspector]
+	public Camera mainCamera;
 	PlayerManager playerManager;
 	Vector3 directionVector;
+	bool moveForward, moveBackward, moveLeft, moveRight, isControllerRunning, isControllerJumping;
+	bool isKbRunning, isKbJumping;
+	#endregion
 
-	// Use this for initialization
-	void Start () {
+	#region Initialization
+	// Initializa internal variables
+	void Awake () {
 		mainCamera = GetComponentInChildren<Camera>();
 		playerManager = GetComponent<PlayerManager>();
+		moveForward = false;
+		moveBackward = false;
+		moveLeft = false;
+		moveRight = false;
+		isControllerRunning = false;
+		isControllerJumping = false;
+		isKbRunning = false;
+		isKbJumping = false;
 	}
+	#endregion
 	
 
 	// Update is called once per frame
@@ -37,7 +53,7 @@ public class MovementController : MonoBehaviour {
 			return;
 		}
 
-		//Debug-----------------------------------------------------------
+		//Debug if the player is dashing, go no further-----------------------------------------------------------
 		if (playerManager.powerState != PlayerManager.PowerState.Normal) {
 			return;
 		}
@@ -125,19 +141,9 @@ public class MovementController : MonoBehaviour {
 	}
 
 
-
-	//Check the keyboard input and update the player accordingly
-	void CheckInput () {
-
-		Vector3 forwardXZ = new Vector3 (mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
-		Vector3 rightXZ = new Vector3 (mainCamera.transform.right.x, 0, mainCamera.transform.right.z);
-		int keysPressed = 0;
-		Vector3 nextDirectionVector = new Vector3 ();
-
-
-		
-		//Debug: Print out the names of the controllers detected -----------------------------
-		bool moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, isRunning = false, isJumping = false;
+	//Update controller's input
+	void UpdateControllerInput () {
+		//Debug: Detecting controller input depending on the platform the game's in -----------------------------
 		if (Application.platform == RuntimePlatform.OSXDashboardPlayer ||
 		    Application.platform == RuntimePlatform.OSXEditor ||
 		    Application.platform == RuntimePlatform.OSXPlayer ||
@@ -146,8 +152,8 @@ public class MovementController : MonoBehaviour {
 			moveBackward = Input.GetAxis("Mac_LeftYAxis") < -0.35f;
 			moveLeft = Input.GetAxis("Mac_LeftXAxis") < -0.35f;
 			moveRight = Input.GetAxis("Mac_LeftXAxis") > 0.35f;
-			isRunning = new Vector2 (Input.GetAxis ("Mac_LeftXAxis"), Input.GetAxis("Mac_LeftYAxis")).magnitude > 0.85f;
-			isJumping = Input.GetButtonDown("Mac_A");
+			isControllerRunning = new Vector2 (Input.GetAxis ("Mac_LeftXAxis"), Input.GetAxis("Mac_LeftYAxis")).magnitude > 0.85f;
+			isControllerJumping = Input.GetButtonDown("Mac_A");
 		}
 		else if (Application.platform == RuntimePlatform.WindowsEditor ||
 		         Application.platform == RuntimePlatform.WindowsPlayer ||
@@ -156,23 +162,57 @@ public class MovementController : MonoBehaviour {
 			moveBackward = Input.GetAxis("Windows_LeftYAxis") < -0.35f;
 			moveLeft = Input.GetAxis("Windows_LeftXAxis") < -0.35f;
 			moveRight = Input.GetAxis("Windows_LeftXAxis") > 0.35f;
-			isRunning = new Vector2 (Input.GetAxis ("Windows_LeftXAxis"), Input.GetAxis("Windows_LeftYAxis")).magnitude > 0.85f;
-			isJumping = Input.GetButtonDown("Windows_A");
+			isControllerRunning = new Vector2 (Input.GetAxis ("Windows_LeftXAxis"), Input.GetAxis("Windows_LeftYAxis")).magnitude > 0.85f;
+			isControllerJumping = Input.GetButtonDown("Windows_A");
 		}
 		//------------------------------------------------------------------------------------
+	}
 
 
-		if (Input.GetKey(KeyCode.W) || moveForward) {
+	//Update keyboard's input
+	void UpdateKeyboardInput () {
+		moveForward = Input.GetKey (KeyCode.W);
+		moveBackward = Input.GetKey (KeyCode.S);
+		moveLeft = Input.GetKey (KeyCode.A);
+		moveRight = Input.GetKey (KeyCode.D);
+		if (Input.GetKey (KeyCode.LeftControl)) {
+			isControllerRunning = false;
+		}
+		else {
+			isControllerRunning = true;
+		}
+		//isControllerRunning = new Vector2 (Input.GetAxis ("Mac_LeftXAxis"), Input.GetAxis("Mac_LeftYAxis")).magnitude > 0.85f;
+		isKbJumping = Input.GetKeyDown (KeyCode.Space);
+	}
+
+
+	//Check the keyboard input and update the player accordingly
+	void CheckInput () {
+
+		//Initialize some needed variables
+		Vector3 forwardXZ = new Vector3 (mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
+		Vector3 rightXZ = new Vector3 (mainCamera.transform.right.x, 0, mainCamera.transform.right.z);
+		int keysPressed = 0;
+		Vector3 nextDirectionVector = new Vector3 ();
+
+		//Update the controller input by updating the flags
+		UpdateControllerInput ();
+
+		//Update the keyboard input with the flags
+		UpdateKeyboardInput ();
+
+		//Update the player's movement state based on the flags
+		if (moveForward) {
 			keysPressed++;
 			nextDirectionVector += forwardXZ;
 			playerManager.movementDirection = PlayerManager.MovementDirection.FORWARD;
 		}
-		if (Input.GetKey(KeyCode.S) || moveBackward) {
+		if (moveBackward) {
 			keysPressed++;
 			nextDirectionVector -= forwardXZ;
 			playerManager.movementDirection = PlayerManager.MovementDirection.BACKWARD;
 		}
-		if (Input.GetKey(KeyCode.A) || moveLeft) {
+		if (moveLeft) {
 			keysPressed++;
 			nextDirectionVector -= rightXZ;
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
@@ -185,7 +225,7 @@ public class MovementController : MonoBehaviour {
 				playerManager.movementDirection = PlayerManager.MovementDirection.LEFT;
 			}
 		}
-		if (Input.GetKey(KeyCode.D) || moveRight) {
+		if (moveRight) {
 			keysPressed++;
 			nextDirectionVector += rightXZ;
 			if (playerManager.movementDirection == PlayerManager.MovementDirection.FORWARD) {
@@ -198,26 +238,28 @@ public class MovementController : MonoBehaviour {
 				playerManager.movementDirection = PlayerManager.MovementDirection.RIGHT;
 			}
 		}
-
+		//If the player is not jumping, check for run/walk status
 		if (keysPressed > 0 && playerManager.movementState != PlayerManager.MovementState.Jumping) {
 			directionVector = nextDirectionVector;
-			if (Input.GetKey(KeyCode.LeftShift) || isRunning) {
+			if (isKbRunning|| isControllerRunning) {
 				playerManager.movementState = PlayerManager.MovementState.RUNNING;
 			}
 			else {
 				playerManager.movementState = PlayerManager.MovementState.WALKING;
 			}
 		}
+		//If the player is not moving nor jumping, make it idle
 		else if (playerManager.movementState!= PlayerManager.MovementState.Jumping){
 			playerManager.movementState = PlayerManager.MovementState.IDLE;
 			directionVector = Vector3.zero;
 		}
+		//If the player is jumping, moving around change its direction a bit
 		else if (playerManager.movementState == PlayerManager.MovementState.Jumping) {
 			directionVector = directionVector + nextDirectionVector.normalized*0.2f;
 		}
 
-		
-		if ((Input.GetKeyDown (KeyCode.Space)|| isJumping) && playerManager.movementState != PlayerManager.MovementState.Jumping) {
+		//Detect jumping
+		if ((isKbJumping|| isControllerJumping) && playerManager.movementState != PlayerManager.MovementState.Jumping) {
 			directionVector = nextDirectionVector;
 			playerManager.movementState = PlayerManager.MovementState.Jumping;
 			playerManager.jumpState = PlayerManager.JumpState.ASCENDING;

@@ -1,24 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//The general controller/manager of the player, contains key variables and state sync function
 public class PlayerManager : MonoBehaviour {
 
-	//Fields
+	#region Fields
 	public enum MovementState { IDLE, WALKING, RUNNING, Jumping };
-	public MovementState movementState;
 	public enum JumpState { ASCENDING, DESCENDING };
-	public JumpState jumpState;
 	public enum MovementDirection { FORWARD, BACKWARD, LEFT, RIGHT, FORWARD_LEFT, FORWARD_RIGHT, BACKWARD_LEFT, BACKWARD_RIGHT }
-	public MovementDirection movementDirection;
 	public enum PowerState { Normal, Boost };
+	//Adjustable
+	public MovementState movementState;
+	public JumpState jumpState;
+	public MovementDirection movementDirection;
 	public PowerState powerState;
 	public Camera mainCamera;
 	public float particleSize;
-	//public bool activated;
+	//Not adjustable
 	MovementController myMovementController;
 	AnimationController myAnimationController;
+	#endregion
 
 
+	#region Initialization
 	// Use this for initialization
 	void Awake () {
 		movementState = MovementState.IDLE;
@@ -27,8 +31,10 @@ public class PlayerManager : MonoBehaviour {
 		myMovementController = GetComponent<MovementController> ();
 		myAnimationController = GetComponent<AnimationController> ();
 	}
+	#endregion
 
 
+	#region State Sync Function
 	//State synchronization stuff
 	void OnSerializeNetworkView(BitStream stream, NetworkMessageInfo info) {
 		Vector3 playerForward = Vector3.zero;
@@ -71,13 +77,14 @@ public class PlayerManager : MonoBehaviour {
 			particleSize = partSize;
 		}
 	}
+	#endregion
 
 
 	// Update is called once per frame
 	void Update () {
 		//if (networkView.isMine) {
 			ParticleSystem projectParticles = GetComponent<ParticleSystem>();
-			//Debug----------------------------
+			//Change the particle velocity of the player (particle size = particle speed)----------------------------
 			ParticleSystem.Particle[] particles = new ParticleSystem.Particle[projectParticles.particleCount+1];
 			int numOfParticles = projectParticles.GetParticles (particles);
 			Vector3 pVelocity = rigidbody.velocity * -1f;
