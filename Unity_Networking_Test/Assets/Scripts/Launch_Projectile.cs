@@ -5,29 +5,37 @@ using System.Collections.Generic;
 //Handles lauching the projectile and its related controls
 public class Launch_Projectile : MonoBehaviour {
 
-	//Fields
+	#region Fields
 	bool rightTriggerDown, rightTriggerReset;
 	bool rightTriggerPressedOnce;
-	
+	bool leftTrigger, leftBumper, rightBumper;
+	bool k1active, k2active, k3active;
+	#endregion
+
+
+	#region Initialization
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		rightTriggerDown = false;
 		rightTriggerReset = true; //Make this true so that first trigger press creates projectile
+		leftTrigger = false;
+		leftBumper = false; 
+		rightBumper = false;
+		k1active = false;
+		k2active = false;
+		k3active = false;
 	}
+	#endregion
 
 
-	// Update is called once per frame
-	void Update () {
-		if (!networkView.isMine) { //Skip this function if the object is not the player's
-			return;
-		}
+	//Update controller status
+	void UpdateControllerInput () {
 		//On Mac, the controller's L/R triggers are initialized to 0 instead of -1, this fix that issue
 		if (Input.GetAxis("Mac_RightTrigger")>0 && rightTriggerPressedOnce == false) {
 			rightTriggerPressedOnce = true;
 		}
 		//Debug: Get the controller's input based on the OS version -----------------------------
 		//Mac OS: triggers -1->1  Windows: triggers 0->1
-		bool leftTrigger = false, leftBumper = false, rightBumper = false;
 		if (Application.platform == RuntimePlatform.OSXDashboardPlayer ||
 		    Application.platform == RuntimePlatform.OSXEditor ||
 		    Application.platform == RuntimePlatform.OSXPlayer ||
@@ -65,28 +73,45 @@ public class Launch_Projectile : MonoBehaviour {
 			else if (rightTriggerReset == false && Input.GetAxis("Windows_RightTrigger") == 0) {
 				rightTriggerReset = true;
 			}
-//			print ("right trigger down: " + rightTriggerDown);
-//			print ("right trigger reset: " + rightTriggerReset);
+			//			print ("right trigger down: " + rightTriggerDown);
+			//			print ("right trigger reset: " + rightTriggerReset);
 			//print ("right trigger value: " + Input.GetAxis ("Windows_RightTrigger"));
 		}
 		//------------------------------------------------------------------------------------
+	}
 
-//		//Testing if the right trigger has been pulled from its resting position (like getButtonDown)
-//		if (Input.GetAxis("Mac_RightTrigger") > -1 && rightTriggerDown == false && rightTriggerReset == true) {
-//			rightTriggerDown = true;
-//		}
-//		else if (rightTriggerDown && Input.GetAxis("Mac_RightTrigger") > -1) {
-//			rightTriggerDown = false;
-//			rightTriggerReset = false;
-//		}
-//		else if (rightTriggerReset == false && Input.GetAxis("Mac_RightTrigger") == -1) {
-//			rightTriggerReset = true;
-//		}
+
+	void UpdateKbInput () {
+		k1active = false;
+		k2active = false;
+		k3active = false;
+		if (Input.GetMouseButtonDown (0)) {
+			k1active = true;
+		}
+		else if (Input.GetKeyDown (KeyCode.Q)) {
+			k2active = true;
+		}
+		else if (Input.GetKeyDown (KeyCode.E)) {
+			k3active = true;
+		}
+	}
+
+
+	// Update is called once per frame
+	void Update () {
+		if (!networkView.isMine) { //Skip this function if the object is not the player's
+			return;
+		}
+
+		UpdateControllerInput ();
+		UpdateKbInput ();
+
 		//Mouse Buttons: 0-->Left, 1-->right, 2-->wheel
 		//launched: rightTriggerDown or rightBumperDown or leftBumperDown
 		bool launched = rightTriggerDown || rightBumper || leftBumper;
+		launched = k1active || k2active || k3active;
 		//If the corresponding input is pressed, launch the corresponding projectile
-		if (Input.GetMouseButtonDown (0) || launched) {
+		if (launched) {
 			//Get the third person camera and it's target transform
 			ThirdPersonCamera TPCamera = GetComponentInChildren<ThirdPersonCamera>();
 			Transform targetTransform = TPCamera.cameraTarget.transform;
@@ -106,23 +131,23 @@ public class Launch_Projectile : MonoBehaviour {
 
 			//Create a RPC call that creates the corresponding projectile
 			GameObject fireBall;
-			if (rightTriggerDown) {
+			if (rightTriggerDown || k1active) {
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Bullet", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
-			else if (rightBumper) {
+			else if (rightBumper || k2active) {
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Grenade", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
-			else if (leftBumper) {
+			else if (leftBumper || k3active) {
 				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
 				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
 			}
-			//Mouse can only lauch one kind of projectile
-			else {
-				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
-				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
-			}
+//			//Mouse can only lauch one kind of projectile
+//			else {
+//				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+//				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
+//			}
 		}
 
 		//Handles the zooming function with right mouse click or left trigger
