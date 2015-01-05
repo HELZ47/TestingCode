@@ -13,12 +13,14 @@ public class CameraEnabler : MonoBehaviour {
 		if(GetComponentInParent<NetworkView>().isMine){
 			GetComponent<Camera>().enabled = true;
 			GetComponent<AudioListener>().enabled = true;
+			GetComponentInChildren <Canvas>().enabled = true;
 			//gameObject.SetActive(false);
 		}
 		else{
 			//gameObject.SetActive(false);
 			GetComponent<Camera>().enabled = false;
 			GetComponent<AudioListener>().enabled = false;
+			GetComponentInChildren <Canvas>().enabled = false;
 		}
 	}
 }

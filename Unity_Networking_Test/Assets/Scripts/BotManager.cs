@@ -120,6 +120,9 @@ public class BotManager : MonoBehaviour {
 				case HealthManager.StatusEffect.BURNED:
 					burnedP.Play();
 					break;
+				case HealthManager.StatusEffect.CONFUSED:
+					confusedP.Play ();
+					break;
 				}
 			}
 		}
