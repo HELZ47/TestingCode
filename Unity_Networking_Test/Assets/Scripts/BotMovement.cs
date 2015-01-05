@@ -128,29 +128,46 @@ public class BotMovement : MonoBehaviour {
 			//If there is a target, move in until it's in the fire range
 			else if (myBotManager.targetAquired && myBotManager.TargetTransform != null) {
 				if (Vector3.Distance(transform.position, myBotManager.TargetTransform.position) < myBotManager.attackingRange) {
-					if (rbEnabled) {
-						rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
-					}
-					else {
-						myNavMeshAgent.Stop ();
-					}
+//					if (rbEnabled) {
+//						//rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
+//						rigidbody.isKinematic = false;
+//					}
+//					else {
+//						myNavMeshAgent.Stop ();
+//					}
+					rigidbody.isKinematic = true;
+//					myNavMeshAgent.SetDestination (myBotManager.TargetTransform.position);
+//					myNavMeshAgent.stoppingDistance = myBotManager.attackingRange*0.5f;
+					myNavMeshAgent.Stop ();
+//					myNavMeshAgent.avoidancePriority = 0;
 					Vector3 direction = (myBotManager.TargetTransform.position - transform.position).normalized;
 					direction.y = 0f;
 					transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
 				}
 				else {
-					if (!rbEnabled) {
-						myNavMeshAgent.Stop();
-						rigidbody.isKinematic = false;
-					}
+//					if (!rbEnabled) {
+//						myNavMeshAgent.Stop();
+//						rigidbody.isKinematic = true;
+//					}
+//					else {
+//						myNavMeshAgent.Stop ();
+//						rigidbody.isKinematic = true;
+//					}
+					rigidbody.isKinematic = true;
+					myNavMeshAgent.SetDestination (myBotManager.TargetTransform.position);
+					myNavMeshAgent.stoppingDistance = myBotManager.attackingRange*0.8f;
+//					myNavMeshAgent.avoidancePriority = 50;
+//					if (myNavMeshAgent.isPathStale) {
+//						myNavMeshAgent.ResetPath ();
+//					}
 					Vector3 direction = (myBotManager.TargetTransform.position - transform.position).normalized;
 					direction.y = 0f;
 					transform.forward = Vector3.Slerp (transform.forward, direction, 0.1f);
-					rigidbody.AddForce (direction * myBotManager.acceleration, ForceMode.Acceleration);
-					Vector3 temp = new Vector3 (rigidbody.velocity.x, 0, rigidbody.velocity.z);
-					if (temp.magnitude > myBotManager.movementSpeed) {
-						rigidbody.velocity = temp.normalized * myBotManager.movementSpeed;
-					}
+//					rigidbody.AddForce (direction * myBotManager.acceleration, ForceMode.Acceleration);
+//					Vector3 temp = new Vector3 (rigidbody.velocity.x, 0, rigidbody.velocity.z);
+//					if (temp.magnitude > myBotManager.movementSpeed) {
+//						rigidbody.velocity = temp.normalized * myBotManager.movementSpeed;
+//					}
 				}
 			}
 			//If there is no targets, bots follow its normal routine
