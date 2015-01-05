@@ -11,7 +11,7 @@
 	<key>CFBundleIconFile</key>
 	<string>PlayerIcon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>unity.DefaultCompany.Unity_Networking_Test</string>
+	<string>unity.HELZ_Productions.Networking_Game_Demo</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

@@ -8,6 +8,8 @@ public class EnergyManager : MonoBehaviour {
 	//Adjustable
 	public float energyAmount, maxEnergyRefillRate, minEnergyRefillRate;
 	//Not Adjustable
+	[HideInInspector]
+	public float energyRatio;
 	float fullEnergy;
 	#endregion
 
@@ -38,16 +40,18 @@ public class EnergyManager : MonoBehaviour {
 		if (!networkView.isMine) {
 			return;
 		}
-		print ("Energy: " + energyAmount);
+		//print ("Energy: " + energyAmount);
 		//Get the current energy refill rate (per second) based on the current amount of energy
 		//More energy you have, the faster it refills
 		float currentERefillRate = minEnergyRefillRate + ((maxEnergyRefillRate-minEnergyRefillRate) * (energyAmount/fullEnergy));
-		print ("Current refill Rate: " + currentERefillRate);
+		//print ("Current refill Rate: " + currentERefillRate);
 
 		//Refill the energy by the current refill rate
 		energyAmount += currentERefillRate * Time.deltaTime;
 		if (energyAmount > fullEnergy) {
 			energyAmount = fullEnergy;
 		}
+
+		energyRatio = energyAmount / fullEnergy;
 	}
 }
