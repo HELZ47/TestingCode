@@ -10,6 +10,7 @@ public class PlayerManager : MonoBehaviour {
 	public enum MovementDirection { FORWARD, BACKWARD, LEFT, RIGHT, FORWARD_LEFT, FORWARD_RIGHT, BACKWARD_LEFT, BACKWARD_RIGHT }
 	public enum PowerState { Normal, Boost };
 	//Adjustable
+	public float fireBulletCost, fireGrenadeCost, fireOrbCost, fireDashCost;
 	public MovementState movementState;
 	public JumpState jumpState;
 	public MovementDirection movementDirection;

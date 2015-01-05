@@ -118,6 +118,8 @@ public class BotMovement : MonoBehaviour {
 			if (GetComponent<HealthManager>().isDead) {
 				if (rbEnabled) {
 					rigidbody.velocity = new Vector3 (0, rigidbody.velocity.y, 0);
+					rigidbody.isKinematic = false;
+					rigidbody.detectCollisions = false;
 				}
 				else {
 					myNavMeshAgent.Stop ();

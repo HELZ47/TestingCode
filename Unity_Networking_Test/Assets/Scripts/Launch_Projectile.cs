@@ -10,6 +10,8 @@ public class Launch_Projectile : MonoBehaviour {
 	bool rightTriggerPressedOnce;
 	bool leftTrigger, leftBumper, rightBumper;
 	bool k1active, k2active, k3active;
+	PlayerManager myPlayerManager;
+	EnergyManager myEnergyManager;
 	#endregion
 
 
@@ -24,6 +26,8 @@ public class Launch_Projectile : MonoBehaviour {
 		k1active = false;
 		k2active = false;
 		k3active = false;
+		myPlayerManager = GetComponent<PlayerManager> ();
+		myEnergyManager = GetComponent<EnergyManager> ();
 	}
 	#endregion
 
@@ -132,16 +136,22 @@ public class Launch_Projectile : MonoBehaviour {
 			//Create a RPC call that creates the corresponding projectile
 			GameObject fireBall;
 			if (rightTriggerDown || k1active) {
-				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
-				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Bullet", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
+				if (myEnergyManager.SpendEnergy (myPlayerManager.fireBulletCost)) {
+					Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+					networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Bullet", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
+				}
 			}
 			else if (rightBumper || k2active) {
-				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
-				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Grenade", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
+				if (myEnergyManager.SpendEnergy (myPlayerManager.fireGrenadeCost)) {
+					Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+					networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Grenade", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
+				}
 			}
 			else if (leftBumper || k3active) {
-				Vector3 direction = (projectileTargetPosition - transform.position).normalized;
-				networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
+				if (myEnergyManager.SpendEnergy (myPlayerManager.fireOrbCost)) {
+					Vector3 direction = (projectileTargetPosition - transform.position).normalized;
+					networkView.RPC ("CreateProjectile", RPCMode.AllBuffered, "Prefabs/Fire_Orb", transform.position+(projectileDirection), new Quaternion(), direction.normalized, Network.player);
+				}
 			}
 //			//Mouse can only lauch one kind of projectile
 //			else {

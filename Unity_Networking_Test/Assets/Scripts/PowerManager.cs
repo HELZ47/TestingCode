@@ -7,10 +7,12 @@ public class PowerManager : MonoBehaviour {
 	public PlayerManager playerManager;
 	float timer;
 	Vector3 prePowerVelocity;
+	EnergyManager myEnergyManager;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		playerManager = GetComponent<PlayerManager> ();
+		myEnergyManager = GetComponent<EnergyManager> ();
 	}
 
 	[RPC]
@@ -41,7 +43,8 @@ public class PowerManager : MonoBehaviour {
 
 		if ((activatePower || Input.GetKeyDown(KeyCode.LeftShift)) && 
 		    playerManager.powerState == PlayerManager.PowerState.Normal &&
-		    (rigidbody.velocity - new Vector3(0, rigidbody.velocity.y, 0)).magnitude > 1.5f) {
+		    (rigidbody.velocity - new Vector3(0, rigidbody.velocity.y, 0)).magnitude > 1.5f &&
+		    myEnergyManager.SpendEnergy (playerManager.fireDashCost)) {
 			//print ("Power Up");
 			playerManager.particleSize = 30f;
 			//networkView.RPC ("ChangeParticleSize", RPCMode.All, 30f);
