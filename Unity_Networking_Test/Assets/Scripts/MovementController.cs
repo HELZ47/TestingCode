@@ -158,6 +158,9 @@ public class MovementController : MonoBehaviour {
 		else if (Application.platform == RuntimePlatform.WindowsEditor ||
 		         Application.platform == RuntimePlatform.WindowsPlayer ||
 		         Application.platform == RuntimePlatform.WindowsWebPlayer) {
+			print ("In Windows!");
+			print ("LeftXAxis: " + Input.GetAxis("Windows_LeftXAxis"));
+			print ("LeftYAxis: " + Input.GetAxis("Windows_LeftYAxis"));
 			moveForward = Input.GetAxis("Windows_LeftYAxis") > 0.35f;
 			moveBackward = Input.GetAxis("Windows_LeftYAxis") < -0.35f;
 			moveLeft = Input.GetAxis("Windows_LeftXAxis") < -0.35f;
